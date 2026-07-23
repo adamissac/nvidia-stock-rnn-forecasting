@@ -49,3 +49,7 @@ jupyter notebook nvidia_stock_rnn.ipynb
 ```
 
 Requires Python 3.10+ and TensorFlow.
+
+## Disclaimer
+
+Educational time-series project only. Not investment advice. Past RMSE on a historical window does not imply future trading performance.
