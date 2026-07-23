@@ -38,3 +38,14 @@ Python, TensorFlow/Keras, Pandas, NumPy, scikit-learn, Matplotlib, Google Colab
 ## Files
 
 - `nvidia_stock_rnn.ipynb` — full notebook with data loading, preprocessing, model training, evaluation, and prediction plots
+
+## How to run
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+jupyter notebook nvidia_stock_rnn.ipynb
+```
+
+Requires Python 3.10+ and TensorFlow.
