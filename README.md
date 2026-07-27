@@ -43,12 +43,13 @@ Python, TensorFlow/Keras, Pandas, NumPy, scikit-learn, Matplotlib, Google Colab
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+python download_data.py
 jupyter notebook nvidia_stock_rnn.ipynb
 ```
 
-Requires Python 3.10+ and TensorFlow.
+Requires Python 3.10+ and TensorFlow. `download_data.py` fetches NVDA history via yfinance and writes `data/TRAIN_NVDA.csv` and `data/TEST_NVDA.csv`. Point the notebook at those files instead of Colab Drive paths.
 
 ## Disclaimer
 
