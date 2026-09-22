@@ -537,14 +537,24 @@ def generated_blocks(res: dict[str, Any]) -> dict[str, str]:
     return blocks
 
 
+# Only these files get generated blocks. SPEC.md quotes the marker strings verbatim, so
+# scanning every doc for markers would overwrite the owner's spec.
+GENERATED_DOCS = ("V1_POSTMORTEM.md", "INTERVIEW_NOTES.md")
+
+
+def generated_targets(docs_dir: Path, readme: Path) -> list[Path]:
+    """Files whose marked blocks are rendered from results.json."""
+    return [readme, *(docs_dir / name for name in GENERATED_DOCS)]
+
+
 def write_generated_docs(res: dict[str, Any], docs_dir: Path, readme: Path) -> list[Path]:
-    """Write RESULTS.md and fill every marked block found in the README and docs."""
+    """Write RESULTS.md and fill the marked blocks in the README and the listed docs."""
     docs_dir.mkdir(parents=True, exist_ok=True)
     (docs_dir / "RESULTS.md").write_text(render_results_md(res), encoding="utf-8")
     touched = [docs_dir / "RESULTS.md"]
     blocks = generated_blocks(res)
-    for path in [readme, *sorted(docs_dir.glob("*.md"))]:
-        if not path.exists() or path.name == "RESULTS.md":
+    for path in generated_targets(docs_dir, readme):
+        if not path.exists():
             continue
         text = path.read_text(encoding="utf-8")
         for name, block in blocks.items():

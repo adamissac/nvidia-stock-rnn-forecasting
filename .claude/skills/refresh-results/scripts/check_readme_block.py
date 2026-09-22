@@ -6,7 +6,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from nvquant.reporting.docs_gen import generated_blocks, render_results_md
+from nvquant.reporting.docs_gen import generated_blocks, generated_targets, render_results_md
 from nvquant.reporting.readme import extract_block, has_block
 from nvquant.reporting.results import load_results
 
@@ -20,7 +20,7 @@ def main() -> int:
     for required in ("RESULTS", "WHAT_DIDNT_WORK"):
         if not has_block(readme, required):
             stale.append(f"README.md is missing the {required} block")
-    for path in [Path("README.md"), *sorted(Path("docs").glob("*.md"))]:
+    for path in [*generated_targets(Path("docs"), Path("README.md")), Path("docs/RESULTS.md")]:
         text = path.read_text(encoding="utf-8")
         if path.name == "RESULTS.md":
             # the generated timestamp line aside, the file must match a fresh render

@@ -26,3 +26,13 @@ def test_build_results_refuses_missing_inputs(tmp_path, fast_cfg):
 
     with pytest.raises(FileNotFoundError, match=r"data_quality\.json"):
         build_results(fast_cfg, tmp_path)
+
+
+def test_generated_blocks_never_touch_unlisted_docs(tmp_path):
+    from nvquant.reporting.docs_gen import generated_targets
+    from nvquant.reporting.readme import END, START
+
+    spec = tmp_path / "SPEC.md"
+    spec.write_text(f"the README block between {START} and {END}\n")
+    targets = generated_targets(tmp_path, tmp_path / "README.md")
+    assert spec not in targets
