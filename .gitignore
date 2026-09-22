@@ -226,5 +226,4 @@ checkpoints/
 # nvquant
 logs/
 reports/fast/
-/data/
 *.lockbox.tmp

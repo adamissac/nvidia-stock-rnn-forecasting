@@ -21,3 +21,13 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 **Result.** The synthetic tests pass. For example, the planted signal with strength 0.1 has a sample correlation between 0.07 and 0.13 over 20,000 rows, and GBM returns show no autocorrelation.
 
 **Decision.** Keep the fast profile synthetic and under a minute, so CI can run the whole pipeline end to end on every push.
+
+## 2026-09-21: Phase 2, data
+
+**Hypothesis.** Everything downstream is only as honest as the data, so the data layer should fail loudly on schema problems, prove the split adjustment is right, and fix the modeling start by rule instead of by choice.
+
+**What ran.** `make data` downloaded 18 Yahoo tickers (with `multi_level_index=False` and `auto_adjust=True`), FRED DGS10 and DGS2 through the keyless CSV endpoint, Ken French FF5 and momentum daily files, and earnings dates for the 11 stocks, into a parquet cache with a SHA256 manifest. `make data-report` then checked every series against the NYSE calendar. Two fixes came out of the first run: Yahoo caps `get_earnings_dates` at `limit=100`, and Yahoo stamps unconfirmed future earnings at 15:00, so I classify an announcement as before the open only if it's before noon.
+
+**Result.** From `reports/data_quality.json`: 0 manifest mismatches, and both NVDA split checks pass (`split_checks_passed: true`; the close ratio across 2021-07-20 is 0.991 and across 2024-06-10 is 1.007). The modeling start is 2006-07-17, set by ^VIX3M, the latest first-valid required input (`modeling_start`). The volume ratio across the 2021 split is 0.509, which is inside the tolerance but close to it. Unadjusted volume would show a ratio near 4, so the check still separates the two cases, but it's worth knowing the margin.
+
+**Decision.** Keep ^VIX3M as a required input even though it moves the start to mid-2006. The consequence is that the 2008 crisis has no out-of-sample model coverage (the first OOS date lands in 2009), so that stress window is reported for benchmarks only.
