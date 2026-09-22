@@ -28,13 +28,17 @@ def _run_ruff(project: Path, file: Path) -> None:
     if uv is None or not (project / ".venv").exists():
         return
     for args in (["ruff", "format", "--quiet"], ["ruff", "check", "--fix", "--quiet"]):
-        subprocess.run(
+        proc = subprocess.run(
             [uv, "run", "--no-sync", *args, str(file)],
             cwd=project,
             capture_output=True,
+            text=True,
             timeout=60,
             check=False,
         )
+        # 0 = clean, 1 = findings left for the lint step; anything else means ruff itself failed
+        if proc.returncode not in (0, 1):
+            print(f"ruff {args[0]} failed: {proc.stderr.strip()[:500]}", file=sys.stderr)
 
 
 def main() -> int:
@@ -42,7 +46,8 @@ def main() -> int:
     try:
         payload = json.load(sys.stdin)
     except (json.JSONDecodeError, ValueError):
-        return 0
+        print("post_edit hook: could not parse the hook payload", file=sys.stderr)
+        return 1
     file_path = (payload.get("tool_input") or {}).get("file_path")
     if not file_path or not str(file_path).endswith(".py"):
         return 0
@@ -61,8 +66,9 @@ def main() -> int:
     sys.path.insert(0, str(lint_dir))
     try:
         import leakage_lint  # type: ignore[import-not-found]
-    except ImportError:
-        return 0
+    except ImportError as exc:
+        print(f"leakage lint unavailable ({exc}); the lookahead check did not run", file=sys.stderr)
+        return 2
     rel = file.relative_to(project.resolve())
     if rel.parts[:2] != ("src", "nvquant"):
         return 0
