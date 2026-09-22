@@ -52,8 +52,11 @@ def available_accelerators() -> dict[str, bool]:
     return {"cuda": torch.cuda.is_available(), "mps": torch.backends.mps.is_available()}
 
 
+CODE_PATHS = ("src", "configs", "app", "pyproject.toml", "uv.lock")
+
+
 def git_sha(short: bool = True) -> str:
-    """Current git commit, with ``-dirty`` if the tree has uncommitted changes."""
+    """Current git commit, with ``-dirty`` if code or config has uncommitted changes."""
     try:
         sha = subprocess.run(
             ["git", "rev-parse", "--short" if short else "--verify", "HEAD"],
@@ -62,8 +65,10 @@ def git_sha(short: bool = True) -> str:
             text=True,
             check=True,
         ).stdout.strip()
+        # "dirty" means the code or config that produced an artifact wasn't committed;
+        # regenerated outputs (reports/, generated docs) don't count
         dirty = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=no"],
+            ["git", "status", "--porcelain", "--untracked-files=no", "--", *CODE_PATHS],
             cwd=PROJECT_ROOT,
             capture_output=True,
             text=True,
