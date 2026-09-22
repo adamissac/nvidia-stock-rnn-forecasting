@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
-    "leakage_lint", ROOT / ".claude/skills/leakage-guard/scripts/leakage_lint.py"
+    "leakage_lint", ROOT / "tools/leakage_lint.py"
 )
 lint = importlib.util.module_from_spec(spec)
 sys.modules["leakage_lint"] = lint

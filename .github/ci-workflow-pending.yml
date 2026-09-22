@@ -23,7 +23,7 @@ jobs:
           uv run ruff format --check .
           uv run ruff check .
       - name: leakage lint
-        run: uv run python .claude/skills/leakage-guard/scripts/leakage_lint.py src/nvquant
+        run: uv run python tools/leakage_lint.py src/nvquant
       - name: mypy
         run: uv run mypy
       - name: pytest (coverage >= 85%, no network)

@@ -23,6 +23,6 @@ repos:
         types: [python]
       - id: leakage-lint
         name: leakage lint
-        entry: uv run python .claude/skills/leakage-guard/scripts/leakage_lint.py
+        entry: uv run python tools/leakage_lint.py
         language: system
         files: ^src/nvquant/.*\.py$

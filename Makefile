@@ -45,7 +45,7 @@ test:
 lint:
 	$(RUN) ruff format --check .
 	$(RUN) ruff check .
-	$(RUN) python .claude/skills/leakage-guard/scripts/leakage_lint.py src/nvquant
+	$(RUN) python tools/leakage_lint.py src/nvquant
 
 typecheck:
 	$(RUN) mypy
