@@ -34,6 +34,8 @@ def _as_positions(t_end: pd.Series, sessions: pd.DatetimeIndex) -> tuple[np.ndar
     end = np.full(len(t_end), np.iinfo(np.int64).max // 2)
     ok = t_end.notna().to_numpy()
     end[ok] = sessions.get_indexer(pd.DatetimeIndex(t_end[ok]))
+    if (end[ok] < 0).any():
+        raise ValueError("label end times must fall on the session calendar passed in")
     return start, end
 
 

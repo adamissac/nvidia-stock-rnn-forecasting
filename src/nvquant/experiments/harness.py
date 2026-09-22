@@ -106,7 +106,9 @@ def walk_forward(
     for k, blk in enumerate(splitter.blocks(pred_idx, t_end)):
         r, block, train = blk.refit_date, blk.test, blk.train
         fs = time.perf_counter()
-        hist = X.loc[: train.max()]
+        # every feature row before the refit date is known at the refit; including the rows
+        # after the last training sample keeps each training label's end inside the index
+        hist = X.loc[X.index < r]
         if mcfg.tune and k % retune_every_blocks == 0:
             tuned_params, trials = tune_lgbm(
                 hist, y.loc[train], t_end, dict(mcfg.params), cfg.tuning, cfg.cv.embargo, cfg.seed
