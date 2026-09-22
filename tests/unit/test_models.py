@@ -145,8 +145,21 @@ def test_ensembles():
     assert equal_weight(P).iloc[0] == pytest.approx(P.iloc[0].mean())
     t_end = pd.Series(idx[np.minimum(np.arange(400) + 2, 399)], index=idx)
     s, w = stacked(P, y, t_end, refit_every=50, min_history=100)
-    assert s.notna().all() and np.allclose(w.sum(axis=1), 1.0)
+    num = w.drop(columns="status").astype(float)
+    assert s.notna().all() and np.allclose(num.sum(axis=1), 1.0)
     assert w.iloc[-1]["good"] > w.iloc[-1]["bad"]
+    assert (w["status"].iloc[:2] == "equal_weight_warmup").all() and w["status"].iloc[-1] == "nnls"
+    # purging: labels that end after a refit date can't change that refit's weights
+    r = w.index[4]
+    y2 = y.copy()
+    y2[(t_end >= r).to_numpy()] = -P["good"][(t_end >= r).to_numpy()] * 10
+    _, w2 = stacked(P, y2, t_end, refit_every=50, min_history=100)
+    assert w2.loc[r, "good"] == w.loc[r, "good"]
+    # a member that only hurts gets no weight; if every member hurts, the stack forecasts zero
+    s0, w0 = stacked(pd.DataFrame({"neg": -P["good"]}), y, t_end, refit_every=50, min_history=100)
+    live = w0[w0["status"] != "equal_weight_warmup"]
+    assert len(live) > 0 and (live["status"] == "all_zero").all()
+    assert (s0.loc[live.index[0] :] == 0).all()
 
 
 def test_v1_replica_matches_v1_architecture():

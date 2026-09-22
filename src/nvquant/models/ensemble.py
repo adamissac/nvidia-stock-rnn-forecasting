@@ -44,9 +44,14 @@ def stacked(
         ]
         if len(hist) >= min_history:
             w, _ = nnls(P.loc[hist].to_numpy(), y.loc[hist].to_numpy())
-            w = w / w.sum() if w.sum() > 0 else np.full(P.shape[1], 1 / P.shape[1])
+            # all-zero NNLS weights mean no member helps, so the honest stack forecasts zero
+            status = "nnls" if w.sum() > 0 else "all_zero"
+            w = w / w.sum() if w.sum() > 0 else np.zeros(P.shape[1])
         else:
+            status = "equal_weight_warmup"
             w = np.full(P.shape[1], 1 / P.shape[1])
-        weights.append(pd.Series(w, index=P.columns, name=r))
+        row = pd.Series(w, index=P.columns, name=r)
+        row["status"] = status
+        weights.append(row)
         out.loc[block] = P.loc[block].to_numpy() @ w
     return out, pd.DataFrame(weights)
