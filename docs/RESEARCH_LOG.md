@@ -41,3 +41,13 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 **Result.** The store has 57 columns over 4,647 sessions (`reports/features_info.json`: `n_features`, `n_rows`). Across the yearly refits, the chosen fracdiff `d` ranged from 0.1 to 0.4 (`fracdiff_d`), so the log price needs well under a full difference to pass ADF. The causality test passes for every group. While writing it I found two causality problems of my own. The month-end feature used the last row of the data as "the last session of the month", which is wrong at the end of a truncated series, so it now reads the published exchange calendar. And `days_to_earn` needs a declared `known_ahead` of 20 sessions, because the date isn't public earlier than that.
 
 **Decision.** Fitted features are computed walk-forward in the store. The rows before their first refit are burn-in, and the harness starts out-of-sample dates strictly after the first refit, so no test row ever sees an in-sample fitted value.
+
+## 2026-09-21: Phase 4, validation framework
+
+**Hypothesis.** If every model goes through one walk-forward harness that purges on label end times, tunes only inside the training window, and logs every fit, then out-of-sample numbers mean what they say, and the trial count for the DSR is complete.
+
+**What ran.** `WalkForward.blocks` (expanding or rolling, with a configurable retrain frequency; training rows need `t_end < refit date`), `PurgedKFold` with embargo, and `CombinatorialPurgedCV` with path assembly. The lockbox sentinel refuses a second run unless it gets `--force` and a written reason, and every forced rerun is appended. There's a JSONL registry, and Optuna tuning for LightGBM runs on purged folds of each training window. Property tests generate random label horizons and check that no training label interval overlaps a test span and that the embargo holds.
+
+**Result.** The property tests pass. In the first full training run, the registry recorded 14 model runs and 320 tuning trials, which is 20 trials at each of 16 yearly retunes (`reports/registry/trials.jsonl`, kinds `model` and `tuning`). LightGBM's walk-forward has 185 monthly refits, the first on 2009-07-22 (its `fold_metrics`).
+
+**Decision.** The DSR's trial count is the number of strategy configurations whose out-of-sample returns I computed (decision D8 in the plan). Tuning trials are logged but reported separately, since they never see out-of-sample returns. The report also shows a DSR that counts every logged fit, to show how much this choice matters.
