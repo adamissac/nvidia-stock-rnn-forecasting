@@ -97,7 +97,7 @@ All return models share one interface: `fit(X, y, w)` and `predict(X, index)`. S
 - Spearman IC. The t-stat is Newey-West on the product of standardized ranks, whose mean equals the Spearman correlation. IC decay is computed against the 1, 5, and 21-session forward returns.
 - Pesaran-Timmermann test of directional accuracy.
 - Calibration: the PIT histogram with a KS test against uniform, and interval coverage (90% for the Gaussian heads, 80% for the quantile heads).
-- Adaptive conformal intervals (Gibbs and Candès 2021), using only residuals whose labels have resolved: $\alpha_{t+1} = \alpha_t + \gamma(\alpha - \text{err}_t)$ with $\gamma = 0.005$.
+- Adaptive conformal intervals (Gibbs and Candès 2021), using only residuals whose labels have resolved. The update $\alpha \leftarrow \alpha + \gamma(\alpha - \text{err}_s)$ for the interval at $s$ is applied at $s+2$, when its outcome is known, with $\gamma = 0.005$.
 - Model confidence set (Hansen, Lunde, and Nason 2011) on squared-error losses, via `arch.bootstrap.MCS`.
 
 ## 8. Strategies and backtest
@@ -125,7 +125,7 @@ $$
 
 **Two engines.** A vectorized engine and an event-driven loop are written separately, and every run checks that they agree to $10^{-10}$. The invariant tests check that a zero signal earns exactly zero, always-long equals buy-and-hold minus one entry cost, higher costs never raise PnL, and a position decided at $t$ earns $r_t$ and nothing else.
 
-**Benchmarks:** buy-and-hold NVDA, vol-targeted buy-and-hold NVDA (the ablation that separates the model from plain vol targeting), SMH, QQQ, a 200-day trend rule, and 1,000 random long/flat signals from a two-state Markov chain matched to the best strategy's exposure and switching rate.
+**Benchmarks:** buy-and-hold NVDA, vol-targeted buy-and-hold NVDA (the ablation that separates the model from plain vol targeting), SMH, QQQ, a 200-day trend rule, and a random-timing null. Each of its 1,000 paths is a random long/flat direction from a two-state Markov chain, matched to the best strategy's long share and switching rate, multiplied by the vol-targeted buy-and-hold leverage path and charged the full cost model. Beating it means the strategy's timing adds something beyond vol targeting.
 
 ## 9. Significance
 
@@ -135,12 +135,12 @@ Sharpe ratios in these formulas are per period (daily), $\widehat{SR} = \bar r /
 - **DSR** (Bailey and López de Prado 2014): the PSR with $SR^* = \sqrt{V[\widehat{SR}_n]}\left((1-\gamma)\Phi^{-1}(1-\tfrac1N) + \gamma\,\Phi^{-1}(1-\tfrac{1}{Ne})\right)$, where $N$ is the number of strategy configurations I backtested, $V$ is the variance of their Sharpe ratios, and $\gamma$ is the Euler-Mascheroni constant. I report it twice: with $N$ as the strategy count, and with $N$ as every logged fit.
 - **MinTRL:** $1 + \left(1 - \gamma_3\widehat{SR} + \frac{\gamma_4-1}{4}\widehat{SR}^2\right)\left(\frac{z_{0.95}}{\widehat{SR} - SR^*}\right)^2$ observations.
 - **PBO** via CSCV (Bailey, Borwein, López de Prado, and Zhu 2017): split the $T \times N$ return matrix into 16 blocks, and for each of the $\binom{16}{8}$ ways to choose half of them as in-sample, find where the in-sample best lands out of sample. With relative rank $\omega$, $\lambda = \log\frac{\omega}{1-\omega}$, and $\text{PBO} = \Pr(\lambda \le 0)$.
-- **Hansen's SPA and White's Reality Check** against buy-and-hold and vol-targeted buy-and-hold, with losses $= -$returns and a stationary bootstrap (1,000 reps).
+- **Hansen's SPA and White's Reality Check** against buy-and-hold and vol-targeted buy-and-hold, with losses $= -$returns and a stationary bootstrap (1,000 reps). Raw returns reward leverage, so I also run SPA with every strategy rescaled to the benchmark's volatility.
 - **Bootstrap CIs:** stationary bootstrap with the Politis-White optimal block length, 1,000 reps.
 
 ## 10. Risk, attribution, and selection bias
 
-- VaR at 95% and 99% four ways: historical, Gaussian, Cornish-Fisher, and GARCH (position times $\hat\sigma_t$ times a unit-variance $t_5$ quantile). Each is backtested with Kupiec's unconditional coverage test and Christoffersen's independence and conditional-coverage tests.
+- VaR at 95% and 99% four ways: historical, Gaussian, Cornish-Fisher, and GARCH (position times $\hat\sigma_t$ times a unit-variance $t_5$ quantile). Each is backtested with Kupiec's unconditional coverage test and Christoffersen's independence and conditional-coverage tests. A strategy return indexed by decision date $t$ is only realized at the open of $t+2$, so a rolling VaR estimated from returns up to $r_t$ is checked against $r_{t+2}$. The GARCH VaR is built from the position and forecast at $t$, so it's checked against $r_t$ itself.
 - Named stress windows before 2025 (the 2008 crisis, Q4 2018, February to March 2020, the 2022 drawdown). Any window before the first out-of-sample date is marked as not covered.
 - Performance split by the filtered HMM regime and by calendar year, including the share of total return earned in 2023 and 2024.
 - Monte Carlo of the equity path with a stationary block bootstrap: quantiles of terminal wealth and drawdown.
