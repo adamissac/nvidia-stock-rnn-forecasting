@@ -63,12 +63,19 @@ def cost_rate(
     if flat_bps is not None:
         return pd.Series(flat_bps * BPS, index=trade.index)
     aum = cfg.aum if aum is None else aum
-    sigma = inputs.sigma.reindex(trade.index).ffill()
-    adv = inputs.adv.reindex(trade.index).ffill()
-    participation = (trade.abs() * aum / adv).clip(lower=0).fillna(0.0)
+    sigma = inputs.sigma.reindex(trade.index)
+    adv = inputs.adv.reindex(trade.index)
+    missing = (trade.abs() > 0) & (sigma.isna() | adv.isna() | (adv <= 0))
+    if missing.any():
+        raise ValueError(
+            f"cost inputs (vol or ADV) missing on {int(missing.sum())} trade dates, first "
+            f"{missing[missing].index[0].date()}; start the backtest after the warmup"
+        )
+    participation = (trade.abs() * aum / adv).where(trade.abs() > 0, 0.0)
     fixed = (cfg.half_spread_bps + cfg.commission_bps) * BPS
     rate = fixed + cfg.slippage_vol_mult * sigma + cfg.impact_coef * sigma * np.sqrt(participation)
-    return rate.fillna(fixed + cfg.slippage_vol_mult * float(inputs.sigma.median()))
+    # rows without a trade cost nothing whatever the rate; keep them finite
+    return rate.where(trade.abs() > 0, fixed)
 
 
 def borrow_rate(cfg: CostsConfig) -> float:

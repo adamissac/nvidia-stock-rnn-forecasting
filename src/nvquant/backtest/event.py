@@ -29,33 +29,25 @@ def run_event(
     """Simulate fills one day at a time. Returns per-day results in capital units."""
     capital = cfg.aum if aum is None else aum
     fixed = (cfg.half_spread_bps + cfg.commission_bps) * BPS
-    sig_fallback = float(inputs.sigma.median())
     dates, nets, grosses, costs_l, pos_l, trades = [], [], [], [], [], []
     held = 0.0
-    last_sigma = float("nan")
-    last_adv = float("nan")
     for date, target in position.items():
         lr = holding_log_return.get(date, np.nan)
         if lr is None or not math.isfinite(lr):
             continue
         target = 0.0 if not math.isfinite(target) else float(target)
         order = target - held  # weight to buy (+) or sell (-) at the open fill
-        s = inputs.sigma.get(date, np.nan)
-        a = inputs.adv.get(date, np.nan)
-        last_sigma = s if math.isfinite(s) else last_sigma
-        last_adv = a if math.isfinite(a) else last_adv
         if flat_bps is not None:
             rate = flat_bps * BPS
-        elif not math.isfinite(last_sigma):
-            rate = fixed + cfg.slippage_vol_mult * sig_fallback
+        elif order == 0.0:
+            rate = fixed
         else:
-            notional = abs(order) * capital
-            part = notional / last_adv if math.isfinite(last_adv) and last_adv > 0 else 0.0
-            rate = (
-                fixed
-                + cfg.slippage_vol_mult * last_sigma
-                + cfg.impact_coef * last_sigma * math.sqrt(part)
-            )
+            s = float(inputs.sigma.get(date, np.nan))
+            a = float(inputs.adv.get(date, np.nan))
+            if not (math.isfinite(s) and math.isfinite(a) and a > 0):
+                raise ValueError(f"cost inputs (vol or ADV) missing on trade date {date}")
+            part = abs(order) * capital / a
+            rate = fixed + cfg.slippage_vol_mult * s + cfg.impact_coef * s * math.sqrt(part)
         fill_cost = rate * abs(order)
         held = target
         pnl = held * math.expm1(lr)

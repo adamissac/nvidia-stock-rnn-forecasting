@@ -30,6 +30,7 @@ from nvquant.portfolio.meta_labeling import bet_size, trend_side
 from nvquant.portfolio.sizing import apply_regime_filter, size
 
 COSTS = CostsConfig()
+WARMUP = 30  # sessions before the ex-ante vol and trailing ADV exist
 
 
 @pytest.fixture(scope="module")
@@ -45,7 +46,8 @@ def test_engines_agree(market, seed, short):
     inputs = cost_inputs(market, ex_ante_vol(market.ohlcv()["close"], 20), COSTS)
     rng = np.random.default_rng(seed)
     lo = -1.5 if short else 0.0
-    pos = pd.Series(rng.uniform(lo, 1.5, len(market.sessions)), index=market.sessions)
+    live = market.sessions[WARMUP:]
+    pos = pd.Series(rng.uniform(lo, 1.5, len(live)), index=live)
     pos[rng.random(len(pos)) < 0.3] = 0.0
     v = run_vectorized(pos, r, inputs, COSTS)
     e = run_event(pos, r, inputs, COSTS)
@@ -82,7 +84,8 @@ def test_always_long_is_buy_and_hold_minus_entry_cost(market, setup):
 
 def test_higher_costs_never_raise_pnl(market, setup):
     r, inputs = setup
-    pos = pd.Series(np.sign(np.sin(np.arange(len(market.sessions)) / 3)), index=market.sessions)
+    live = market.sessions[WARMUP:]
+    pos = pd.Series(np.sign(np.sin(np.arange(len(live)) / 3)), index=live)
     totals = [
         run_vectorized(pos, r, inputs, COSTS, flat_bps=b).net.sum() for b in (0, 1, 5, 10, 20)
     ]
@@ -114,11 +117,20 @@ def test_borrow_charged_on_shorts(market, setup):
     assert res.costs.iloc[5] == pytest.approx(COSTS.borrow_bps_annual * BPS / 252)
 
 
-def test_cost_rate_grows_with_trade_size(market, setup):
+def test_cost_rate_matches_formula_and_refuses_missing_inputs(market, setup):
     _, inputs = setup
-    small = cost_rate(pd.Series(0.1, index=market.sessions), inputs, COSTS)
-    big = cost_rate(pd.Series(1.0, index=market.sessions), inputs, CostsConfig(aum=1e10))
-    assert (big.dropna() >= small.dropna()).all()
+    live = market.sessions[WARMUP:]
+    trade = pd.Series(0.5, index=live)
+    only_impact = CostsConfig(half_spread_bps=0.0, commission_bps=0.0, slippage_vol_mult=0.0, impact_coef=0.1, aum=1e9)
+    got = cost_rate(trade, inputs, only_impact)
+    sig, adv = inputs.sigma.reindex(live), inputs.adv.reindex(live)
+    np.testing.assert_allclose(got, 0.1 * sig * np.sqrt(0.5 * 1e9 / adv), rtol=1e-12)
+    with pytest.raises(ValueError, match="missing"):
+        cost_rate(pd.Series(0.5, index=market.sessions[:5]), inputs, COSTS)
+    with pytest.raises(ValueError, match="missing"):
+        run_event(pd.Series(1.0, index=market.sessions[:5]), holding_log_return(market), inputs, COSTS)
+    # no trade, no cost, even during the warmup
+    assert (cost_rate(pd.Series(0.0, index=market.sessions[:5]), inputs, COSTS) >= 0).all()
 
 
 def test_sizing_rules():
