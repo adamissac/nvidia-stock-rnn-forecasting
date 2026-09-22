@@ -9,16 +9,17 @@ These are my own notes for explaining this project. For each component: what it 
 |---|---|
 | Out-of-sample period | 2009-07-22 to 2024-12-31 (3,884 sessions) |
 | Strategy configurations (DSR trials) | 80 |
-| Every logged fit | 421 |
+| Every logged fit | 842 |
 | Best configuration | `hist_mean` + voltarget |
 | Its net Sharpe [95% CI] | 1.18 [0.68, 1.64] |
 | Vol-targeted buy and hold | 1.21 |
 | Buy and hold | 1.10 |
-| DSR (strategy trials / all fits) | 0.99 / 0.95 |
+| DSR (strategy trials / all fits) | 0.99 / 0.93 |
 | PBO | 0.29 |
 | SPA p vs vol-targeted buy and hold | 0.15 |
-| FF5 + momentum alpha (t) | 32.8% (3.98) |
-| Share of summed daily PnL from 2023 and 2024 | 29% |
+| FF5 + momentum alpha (t) | 24.1% (2.41) |
+| Share of the compounded gain from 2023 and 2024 | 83% |
+| Share of summed daily returns from 2023 and 2024 | 29% |
 <!-- KEY_NUMBERS:END -->
 
 ## Resume bullets
