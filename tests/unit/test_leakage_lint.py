@@ -3,9 +3,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location(
-    "leakage_lint", ROOT / "tools/leakage_lint.py"
-)
+spec = importlib.util.spec_from_file_location("leakage_lint", ROOT / "tools/leakage_lint.py")
 lint = importlib.util.module_from_spec(spec)
 sys.modules["leakage_lint"] = lint
 spec.loader.exec_module(lint)
