@@ -66,3 +66,17 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 - The stacking weights jump between members from refit to refit (`reports/forecasts_stack_weights.parquet`), which is what you'd expect when the members' edges are this small.
 
 **Decision.** Keep GJR-GARCH-t for sizing even though HAR and LightGBM score better. Switching after seeing the scores would be one more untracked selection step. Move on to strategies: a small IC can still matter as a trading signal, so Phase 6 tests that directly.
+
+## 2026-09-22: Phase 6, strategies and backtest
+
+**Hypothesis.** Even a small IC can pay after costs if the sizing is right. The test that matters is whether any forecast beats holding NVDA with the same volatility targeting, since vol targeting alone is known to raise the Sharpe of a volatile stock.
+
+**What ran.** 80 strategy configurations (13 forecasts times 6 sizing rules, plus meta-labeling raw and vol-targeted) and 5 benchmarks over 3,884 decision dates, with next-open fills, the full cost model at $10M, both engines, a 0 to 20 bps cost sweep, and a capacity sweep up to $30B. Every configuration is registered as a strategy trial (`reports/registry/trials.jsonl`, kind `strategy`: 80 rows).
+
+**Result.** From `reports/results.json`:
+- The engines agree to 1.4e-17 (`meta.engine_max_abs_diff`).
+- The best configuration is the historical-mean baseline with vol targeting (net Sharpe 1.18, `headline.best_sharpe`), below vol-targeted buy and hold (1.21) and the 200-day trend rule (1.24). The best strategy on an ML forecast is LightGBM with vol targeting at 1.14.
+- The regime filter lowered the Sharpe for all 13 vol-targeted strategies that used it. Meta-labeling on the trend rule reached 0.45, against 1.24 for the trend rule it was meant to improve.
+- Costs aren't what decides the ranking. The best configuration goes from 1.19 at 0 bps to 1.16 at 20 bps per side (`cost_sweep`), and square-root impact barely matters until $10B (`capacity`), because its turnover is low.
+
+**Decision.** Nothing so far beats the key ablation. I'll run the full statistics (DSR, PBO, SPA, attribution, peers) before calling it, but no parameter will be changed to chase the benchmark.
