@@ -150,26 +150,37 @@ class SPAResult:
     spa_lower: float
     spa_upper: float
     reality_check: float
+    vol_matched_spa_consistent: float
 
 
 def spa_test(bench: pd.Series, models: pd.DataFrame, reps: int, seed: int) -> SPAResult:
-    """Is any model better than the benchmark after data snooping? Losses are negative returns."""
+    """Is any model better than the benchmark after data snooping? Losses are negative returns.
+
+    The raw test compares mean returns, so a more levered strategy can win on leverage
+    alone. The vol-matched version rescales each strategy to the benchmark's volatility
+    first (an ex-post scaling, used only as a check on the raw result).
+    """
     from arch.bootstrap import SPA
 
     df = pd.concat([bench.rename("__bench__"), models], axis=1).dropna()
-    spa = SPA(-df["__bench__"], -df.drop(columns="__bench__"), reps=reps, seed=seed)
+    b = -df["__bench__"]
+    m = -df.drop(columns="__bench__")
+    spa = SPA(b, m, reps=reps, seed=seed)
     spa.compute()
-    pv = spa.pvalues
-    rc = SPA(
-        -df["__bench__"], -df.drop(columns="__bench__"), reps=reps, seed=seed, studentize=False
-    )
+    rc = SPA(b, m, reps=reps, seed=seed, studentize=False)
     rc.compute()
+    std = df.std()
+    live = [c for c in m.columns if std[c] > 0]
+    vm = SPA(b, m[live] * (std["__bench__"] / std[live]), reps=reps, seed=seed)
+    vm.compute()
+    pv = spa.pvalues
     return SPAResult(
         str(bench.name),
         float(pv["consistent"]),
         float(pv["lower"]),
         float(pv["upper"]),
         float(rc.pvalues["upper"]),
+        float(vm.pvalues["consistent"]),
     )
 
 
