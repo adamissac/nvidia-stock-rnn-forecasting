@@ -16,7 +16,10 @@ from scipy.stats import norm
 
 from nvquant.cv.splits import WalkForward
 from nvquant.labels.triple_barrier import meta_labels
+from nvquant.logging_utils import get_logger
 from nvquant.models.trees import LGBMClassifierModel
+
+log = get_logger(__name__)
 
 
 def trend_side(close: pd.Series, window: int) -> pd.Series:
@@ -54,6 +57,8 @@ def meta_label_positions(
     for blk in WalkForward(retrain_every).blocks(pred_dates, t_end):
         train = blk.train
         if len(train) < 200 or y.loc[train].nunique() < 2:
+            log.info("meta-labeling: skipped block at %s (%d resolved bets); size stays 0",
+                     blk.refit_date.date(), len(train))  # fmt: skip
             continue
         clf = LGBMClassifierModel(
             seed=seed, n_estimators=200, learning_rate=0.03, num_leaves=7, min_child_samples=50
