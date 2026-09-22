@@ -682,6 +682,14 @@ def evaluate_risk(
         if pnl.sum() != 0
         else float("nan")
     )
+    # compounded: the share of the final dollar gain made during 2023-2024 (this is the
+    # number that shows how much the ending equity depends on those two years)
+    eq = (1 + pnl.fillna(0.0)).cumprod()
+    before = eq[years_idx < 2023]
+    start_23 = float(before.iloc[-1]) if len(before) else 1.0
+    end_24 = float(eq[years_idx <= 2024].iloc[-1])
+    gain = float(eq.iloc[-1]) - 1.0
+    dollar_share = (end_24 - start_23) / gain if gain != 0 else float("nan")
     block = bootstrap_sharpe_ci(pnl.dropna(), 10, cfg.seed)[2]
     mc = {
         n: bootstrap_equity_paths(net[n], cfg.evaluation.mc_paths, cfg.seed, block) for n in focus
@@ -689,7 +697,7 @@ def evaluate_risk(
     return {
         "attribution": attribution, "var": risk, "stress": stress, "regimes": regimes,
         "calendar_years": {n: {str(k): v for k, v in y.items()} for n, y in years.items()},
-        "pnl_share_2023_2024": share_23_24, "monte_carlo": mc,
+        "pnl_share_2023_2024": share_23_24, "gain_share_2023_2024": dollar_share, "monte_carlo": mc,
     }  # fmt: skip
 
 

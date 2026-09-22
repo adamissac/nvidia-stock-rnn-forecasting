@@ -155,6 +155,7 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
             "alpha_smh_ann": attribution[best].get("SMH", {}).get("alpha_ann"),
             "alpha_smh_t": attribution[best].get("SMH", {}).get("alpha_t"),
             "pnl_share_2023_2024": risk["pnl_share_2023_2024"],
+            "gain_share_2023_2024": risk["gain_share_2023_2024"],
         },
         "strategies": {k: _strategy_row(k, rows[k]) for k in table_strategies(strat)},
         "all_strategy_sharpes": {k: v["sharpe"] for k, v in rows.items()},

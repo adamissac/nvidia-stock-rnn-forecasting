@@ -71,7 +71,8 @@ def render_results_block(res: dict[str, Any]) -> str:
         f"{fmt(h['spa_vs_bh_voltarget'])}; against buy and hold: {fmt(h['spa_vs_bh_target'])}.",
         f"- Random long/flat signals with the same turnover beat it {fmt(1 - h['random_null_percentile'], '.1f', True)} of the time.",
         f"- Fama-French 5 + momentum alpha: {fmt(h['alpha_ff5_ann'], '.1f', True)} a year (t = {fmt(h['alpha_ff5_t'])}). "
-        f"Share of its summed daily PnL earned in 2023 and 2024: {fmt(h['pnl_share_2023_2024'], '.0f', True)}.",
+        f"2023 and 2024 account for {fmt(h['gain_share_2023_2024'], '.0f', True)} of its compounded dollar gain "
+        f"({fmt(h['pnl_share_2023_2024'], '.0f', True)} of its summed daily returns).",
         "",
         "| Forecast model | IC | IC t (NW) | R2 OOS vs zero | DM p vs zero | Hit rate |",
         "|---|---|---|---|---|---|",

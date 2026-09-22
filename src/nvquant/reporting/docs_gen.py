@@ -140,7 +140,8 @@ def render_key_numbers(res: dict[str, Any]) -> str:
 | PBO | {fmt(h["pbo"])} |
 | SPA p vs vol-targeted buy and hold | {fmt(h["spa_vs_bh_voltarget"])} |
 | FF5 + momentum alpha (t) | {fmt(h["alpha_ff5_ann"], ".1f", True)} ({fmt(h["alpha_ff5_t"])}) |
-| Share of summed daily PnL from 2023 and 2024 | {fmt(h["pnl_share_2023_2024"], ".0f", True)} |"""
+| Share of the compounded gain from 2023 and 2024 | {fmt(h["gain_share_2023_2024"], ".0f", True)} |
+| Share of summed daily returns from 2023 and 2024 | {fmt(h["pnl_share_2023_2024"], ".0f", True)} |"""
 
 
 def _table(headers: list[str], rows: list[list[str]]) -> str:
