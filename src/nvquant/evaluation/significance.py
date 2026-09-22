@@ -114,7 +114,10 @@ def pbo_cscv(returns: pd.DataFrame, n_blocks: int = 16) -> PBOResult:
     share of combinations with ``lambda <= 0`` (the IS winner is at or below the
     OOS median).
     """
-    M = returns.dropna().to_numpy()
+    # a strategy with zero variance (always flat) has no Sharpe; it would win every
+    # in-sample round with an infinite ratio, so it's dropped before CSCV
+    R = returns.dropna()
+    M = R.loc[:, R.std() > 0].to_numpy()
     T, N = M.shape
     blocks = np.array_split(np.arange(T), n_blocks)
     logits, is_best, oos_best = [], [], []
