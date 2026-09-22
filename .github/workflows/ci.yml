@@ -17,7 +17,7 @@ jobs:
       - name: Install Python 3.12
         run: uv python install 3.12
       - name: Sync (CPU torch wheels on Linux)
-        run: uv sync --all-extras --frozen
+        run: uv sync --frozen
       - name: ruff
         run: |
           uv run ruff format --check .

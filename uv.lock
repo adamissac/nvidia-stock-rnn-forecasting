@@ -953,13 +953,11 @@ dependencies = [
     { name = "yfinance" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 app = [
     { name = "altair" },
     { name = "streamlit" },
 ]
-
-[package.dev-dependencies]
 dev = [
     { name = "hypothesis" },
     { name = "mypy" },
@@ -975,7 +973,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "altair", marker = "extra == 'app'", specifier = ">=5" },
     { name = "arch", specifier = ">=7.2" },
     { name = "exchange-calendars", specifier = ">=4.6" },
     { name = "hmmlearn", specifier = ">=0.3.3" },
@@ -993,15 +990,17 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.6" },
     { name = "scipy", specifier = ">=1.14" },
     { name = "statsmodels", specifier = ">=0.14.4" },
-    { name = "streamlit", marker = "extra == 'app'", specifier = ">=1.40" },
     { name = "torch", marker = "sys_platform != 'linux'", specifier = ">=2.5" },
     { name = "torch", marker = "sys_platform == 'linux'", specifier = ">=2.5", index = "https://download.pytorch.org/whl/cpu" },
     { name = "typer", specifier = ">=0.15" },
     { name = "yfinance", specifier = ">=0.2.54" },
 ]
-provides-extras = ["app"]
 
 [package.metadata.requires-dev]
+app = [
+    { name = "altair", specifier = ">=5" },
+    { name = "streamlit", specifier = ">=1.40" },
+]
 dev = [
     { name = "hypothesis", specifier = ">=6.120" },
     { name = "mypy", specifier = ">=1.13" },

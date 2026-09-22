@@ -30,7 +30,7 @@ valid outcome. When something looks too good, assume a bug.
 
 | target | what it does |
 |--------|--------------|
-| setup | `uv sync --all-extras` and pre-commit install |
+| setup | `uv sync` and pre-commit install |
 | data / data-report | download and cache raw data + manifest / data-quality report |
 | features | build the feature and label store, regenerate docs/FEATURES.md |
 | train | walk-forward forecasts for every enabled model |

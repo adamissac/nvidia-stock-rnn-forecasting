@@ -8,7 +8,7 @@ NV      := $(RUN) nvquant
         test lint typecheck ci app smoke clean-fast
 
 setup:
-	uv sync --all-extras
+	uv sync
 	$(RUN) python scripts/macos_libomp.py
 	$(RUN) pre-commit install
 
