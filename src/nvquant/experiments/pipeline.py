@@ -428,7 +428,7 @@ def stage_backtest(cfg: Config) -> Path:
     specs = {k: asdict(v) for k, v in bundle.specs.items()}
     cost_sweep(cfg, loaded.market, store, bundle).to_parquet(out / "cost_sweep.parquet")
     model_names = [k for k, v in bundle.specs.items() if v.kind != "benchmark"]
-    best = max(model_names, key=lambda k: sharpe(bundle.net[k]))
+    best = best_strategy({k: sharpe(bundle.net[k]) for k in model_names})
     capacity_sweep(
         cfg, loaded.market, store, bundle, [best, "bh_voltarget", "bh_target"]
     ).to_parquet(out / "capacity.parquet")
@@ -549,6 +549,14 @@ def evaluate_forecasts(
     }
 
 
+def best_strategy(sharpes: dict[str, float]) -> str:
+    """Name with the highest finite Sharpe (NaN Sharpes, from always-flat strategies, never win)."""
+    finite = {k: v for k, v in sharpes.items() if v == v}
+    if not finite:
+        raise ValueError("no strategy has a finite Sharpe")
+    return max(finite, key=lambda k: finite[k])
+
+
 def evaluate_strategies(
     cfg: Config,
     bundle: BacktestBundle,
@@ -562,7 +570,10 @@ def evaluate_strategies(
     net = bundle.net
     model_names = [k for k, v in bundle.specs.items() if v.kind != "benchmark"]
     bench_names = [k for k, v in bundle.specs.items() if v.kind == "benchmark"]
-    trial_srs = np.array([sharpe(net[k], annualize=False) for k in model_names])
+    # always-flat strategies have no Sharpe; they're still trials (N counts them) but can't
+    # enter the Sharpe variance
+    all_srs = np.array([sharpe(net[k], annualize=False) for k in model_names])
+    trial_srs = all_srs[np.isfinite(all_srs)]
     n_trials = len(model_names)
     n_all_fits = len(reg_rows)
     rows: dict[str, dict[str, object]] = {}
@@ -580,7 +591,7 @@ def evaluate_strategies(
         m["min_trl_days"] = min_track_record_length(r.to_numpy())
         m["kind"] = bundle.specs[name].kind
         rows[name] = m
-    best = max(model_names, key=lambda k: float(rows[k]["sharpe"]))  # type: ignore[arg-type]
+    best = best_strategy({k: float(rows[k]["sharpe"]) for k in model_names})  # type: ignore[arg-type]
     pbo = pbo_cscv(net[model_names], cfg.evaluation.pbo_blocks)
     spa = {
         b: asdict(spa_test(net[b], net[model_names], cfg.evaluation.spa_reps, cfg.seed))
@@ -741,6 +752,11 @@ def evaluate_peers(cfg: Config, loaded: LoadedData, best: str) -> dict[str, obje
     from joblib import Parallel, delayed
 
     model, sizing = best.split(STRATEGY_SEP)
+    if sizing not in {sc.name for sc in cfg.strategy.sizings}:
+        # meta-labeling's "raw" and "voltarget" sizes aren't forecast sizing rules;
+        # vol targeting is the closest one that applies to every forecast
+        log.info("peer study: best strategy %s has no forecast sizing rule; using voltarget", best)
+        sizing = "voltarget"
     models = list(
         dict.fromkeys([*cfg.evaluation.peer_models, *([model] if model in cfg.models else [])])
     )
