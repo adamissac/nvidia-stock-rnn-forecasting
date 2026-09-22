@@ -51,3 +51,18 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 **Result.** The property tests pass. In the first full training run, the registry recorded 14 model runs and 320 tuning trials, which is 20 trials at each of 16 yearly retunes (`reports/registry/trials.jsonl`, kinds `model` and `tuning`). LightGBM's walk-forward has 185 monthly refits, the first on 2009-07-22 (its `fold_metrics`).
 
 **Decision.** The DSR's trial count is the number of strategy configurations whose out-of-sample returns I computed (decision D8 in the plan). Tuning trials are logged but reported separately, since they never see out-of-sample returns. The report also shows a DSR that counts every logged fit, to show how much this choice matters.
+
+## 2026-09-22: Phase 5, models
+
+**Hypothesis.** If daily NVDA returns are forecastable from these features, at least one model (linear, boosted trees, or a small sequence model) should beat the naive baselines out of sample, and the gain should survive a Diebold-Mariano test and the model confidence set.
+
+**What ran.** Walk-forward over 3,884 decision dates (2009-07-22 to 2024-12-31) for 14 return forecasters: zero, historical mean, AR(p), ridge, elastic net, LightGBM (nested Optuna), LSTM and GRU with Gaussian and quantile heads, TCN, PatchTST-lite, and equal-weight and stacked ensembles. Also six volatility models and the v1 replica. Wall times are in the registry: 34 to 52 s for each deep model except TCN at 344 s, 53 s for LightGBM with tuning, and 657 s for the v1 replica (`reports/registry/trials.jsonl`, `wall_time_s`). The whole development pipeline took about 21 minutes against the 3-hour budget.
+
+**Result.** From `reports/results.json` (`forecasts`, `mcs_pvalues`, `vol_models`, `v1_replica`):
+- The strongest IC is the AR baseline's (0.056, NW t = 3.35), then elastic net (0.036, t = 2.24) and ridge (0.033, t = 1.99). Out-of-sample R2 against the zero forecast is under half a percent for every model, and no model beats the zero forecast in a Diebold-Mariano test at 5%. The deep models all have negative R2 (-2.01% to -0.10%), and the model confidence set at 10% drops PatchTST, TCN, and both GRUs.
+- The Gaussian heads' 90% intervals cover 90.6% to 91.9% of outcomes, but the PIT KS test rejects uniformity. The quantile heads' 80% intervals cover only about 70%, so they're too narrow.
+- Volatility: LightGBM has the lowest QLIKE (0.331) but under-forecasts (MZ beta 1.38). HAR is the best calibrated (MZ beta 1.04). GJR-GARCH-t, the sizing model I picked before seeing any results, has QLIKE 0.491.
+- The v1 replica is worse than persistence on 92.2% of days. Its forecast blew up (above 10 times the training maximum) on 10.6% of days, because once prices leave the MinMax range the ReLU cells diverge. The training loss was small at every refit, so this only shows up out of sample.
+- The stacking weights jump between members from refit to refit (`reports/forecasts_stack_weights.parquet`), which is what you'd expect when the members' edges are this small.
+
+**Decision.** Keep GJR-GARCH-t for sizing even though HAR and LightGBM score better. Switching after seeing the scores would be one more untracked selection step. Move on to strategies: a small IC can still matter as a trading signal, so Phase 6 tests that directly.
