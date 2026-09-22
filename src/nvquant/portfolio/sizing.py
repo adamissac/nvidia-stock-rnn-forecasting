@@ -38,7 +38,10 @@ def vol_target_position(
     direction: pd.Series, var_forecast: pd.Series, sc: SizingConfig, st: StrategyConfig
 ) -> pd.Series:
     """Direction times ``target_vol / forecast_vol`` (annualized), capped at ``max_gross``."""
-    vol = np.sqrt(var_forecast.reindex(direction.index) * ANN)
+    var = var_forecast.reindex(direction.index)
+    if (var <= 0).any():
+        raise ValueError("variance forecast must be positive")
+    vol = np.sqrt(var * ANN)
     lev = (st.target_vol / vol).clip(upper=st.max_gross)
     return (direction * lev).clip(_floor(sc, st.max_gross), st.max_gross).fillna(0.0)
 
@@ -47,7 +50,10 @@ def kelly_position(
     forecast: pd.Series, var_forecast: pd.Series, sc: SizingConfig, st: StrategyConfig
 ) -> pd.Series:
     """Fractional Kelly: ``f * mu / sigma^2`` with the return forecast and the variance forecast, capped."""
-    raw = sc.kelly_fraction * forecast / var_forecast.reindex(forecast.index)
+    var = var_forecast.reindex(forecast.index)
+    if (var <= 0).any():
+        raise ValueError("variance forecast must be positive")
+    raw = sc.kelly_fraction * forecast / var
     return raw.clip(_floor(sc, st.max_gross), st.max_gross).fillna(0.0)
 
 
@@ -55,7 +61,8 @@ def apply_regime_filter(
     position: pd.Series, p_high: pd.Series, threshold: float = 0.5
 ) -> pd.Series:
     """Go flat when the filtered probability of the high-vol regime is above ``threshold``."""
-    return position.where(p_high.reindex(position.index).fillna(0.0) <= threshold, 0.0)
+    # a missing regime probability means "unknown", so the filter fails closed (flat)
+    return position.where(p_high.reindex(position.index).fillna(1.0) <= threshold, 0.0)
 
 
 def size(
