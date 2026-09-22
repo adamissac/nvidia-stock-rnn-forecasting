@@ -22,7 +22,7 @@ from nvquant.backtest.strategies import (
 )
 from nvquant.backtest.vectorized import run_vectorized
 from nvquant.config import Config, ModelConfig, SizingConfig, config_hash
-from nvquant.cv.lockbox import LockboxError, check_can_open, record_open
+from nvquant.cv.lockbox import LockboxError, check_can_open, mark_completed, record_open
 from nvquant.cv.splits import CombinatorialPurgedCV, PurgedKFold
 from nvquant.data.loader import LoadedData, download_all, load_market_data, resolve, write_synthetic
 from nvquant.data.market import MarketData
@@ -537,14 +537,10 @@ def evaluate_forecasts(
             }
         out[name] = s
         losses[name] = (y.reindex(dates) - f["pred"]) ** 2
+    # No fallback: the loss matrix comes from this pipeline, so an MCS failure means
+    # something upstream is wrong, and an empty result would read as "every model survived".
     L = pd.DataFrame(losses).dropna()
-    try:
-        mcs = model_confidence_set(
-            L * 1e4, cfg.evaluation.mcs_size, cfg.evaluation.spa_reps, cfg.seed
-        )
-    except (ValueError, np.linalg.LinAlgError) as exc:
-        log.warning("MCS failed: %s", exc)
-        mcs = {}
+    mcs = model_confidence_set(L * 1e4, cfg.evaluation.mcs_size, cfg.evaluation.spa_reps, cfg.seed)
     return {
         "models": out,
         "mcs_pvalues": mcs,
@@ -1012,7 +1008,15 @@ def stage_lockbox(cfg: Config, force: bool = False, reason: str | None = None) -
     plan = preregistered(cfg)
     if cfg.profile == "full":
         _require_committed(["docs/PREREGISTRATION.md", "configs/preregistration.yaml"])
+    else:
+        log.warning("profile %s: skipping the preregistration commit check", cfg.profile)
+    sha = git_sha()
+    if sha == "unknown":
+        raise LockboxError("git SHA unavailable; the lockbox run must be tied to a commit")
     loaded = load_market_data(cfg, mode="lockbox")
+    # Record the opening before any lockbox number exists, so a crash later in this
+    # function still counts as the one evaluation.
+    record_open(out, sha, loaded.data_hash, config_hash(cfg), reason)
     store = build_store(cfg, loaded)
     save_store(store, cfg, mode="lockbox")
     start = pd.Timestamp(cfg.lockbox.start)
@@ -1039,7 +1043,6 @@ def stage_lockbox(cfg: Config, force: bool = False, reason: str | None = None) -
                   "kind": bundle.specs[n].kind})  # fmt: skip
         rows[n] = m
     stress = stress_windows(bundle.net[names], cfg.evaluation.lockbox_stress_windows)
-    sha = git_sha()
     ldir = out / "lockbox"
     ldir.mkdir(parents=True, exist_ok=True)
     for key, frame in (("net", bundle.net), ("positions", bundle.positions)):
@@ -1050,7 +1053,7 @@ def stage_lockbox(cfg: Config, force: bool = False, reason: str | None = None) -
         "data_hash": loaded.data_hash, "engine_max_abs_diff": bundle.engine_max_diff,
     }  # fmt: skip
     _write_json(ldir / "results.json", result)
-    record_open(out, sha, loaded.data_hash, config_hash(cfg), reason)
+    mark_completed(out)
     registry(cfg).log(
         Trial(kind="lockbox", name="lockbox", run_id=run_id(), git_sha=sha, data_hash=loaded.data_hash,
               config={"plan": plan}, metrics={n: rows[n]["sharpe"] for n in names})

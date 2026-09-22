@@ -51,8 +51,19 @@ def record_open(
             "config_hash": config_hash,
             "forced": bool(payload["runs"]),
             "reason": reason,
+            "status": "started",
         }
     )
     payload["n_runs"] = len(payload["runs"])
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def mark_completed(reports_dir: Path) -> Path:
+    """Mark the latest run as completed (it was recorded as started before any computation)."""
+    path = sentinel_path(reports_dir)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["runs"][-1]["status"] = "completed"
+    payload["runs"][-1]["completed_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return path
