@@ -122,11 +122,18 @@ def write_synthetic(cfg: Config) -> Path:
     m = synthetic_market(cfg.universe, s.n_sessions, s.start, s.signal_strength, cfg.seed)
     entries = []
     for ticker, df in m.prices.items():
-        entries.append(_write(raw, f"yahoo/{ticker_filename(ticker)}", df, "synthetic", "synthetic"))
+        entries.append(
+            _write(raw, f"yahoo/{ticker_filename(ticker)}", df, "synthetic", "synthetic")
+        )
     for col in m.rates.columns:
         entries.append(
-            _write(raw, f"fred/{col}.parquet", m.rates[[col]].rename(columns={col: "value"}),
-                   "synthetic", "synthetic")  # fmt: skip
+            _write(
+                raw,
+                f"fred/{col}.parquet",
+                m.rates[[col]].rename(columns={col: "value"}),
+                "synthetic",
+                "synthetic",
+            )
         )
     ff5 = m.factors[["mkt_rf", "smb", "hml", "rmw", "cma", "rf"]]
     entries.append(_write(raw, "french/ff5.parquet", ff5, "synthetic", "synthetic"))

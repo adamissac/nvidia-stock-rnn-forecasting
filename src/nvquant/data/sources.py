@@ -11,7 +11,6 @@ import io
 import time
 import zipfile
 from collections.abc import Callable
-from typing import TypeVar
 
 import numpy as np
 import pandas as pd
@@ -20,7 +19,6 @@ import requests
 from nvquant.logging_utils import get_logger
 
 log = get_logger(__name__)
-T = TypeVar("T")
 
 FRED_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
 FRENCH_BASE = "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/"
@@ -32,7 +30,7 @@ YAHOO_URL = "https://finance.yahoo.com/quote/{ticker}"
 _HEADERS = {"User-Agent": "nvquant research (github.com/adamissac/nvidia-stock-rnn-forecasting)"}
 
 
-def with_retries(fn: Callable[[], T], what: str, retries: int, backoff: float) -> T:
+def with_retries[T](fn: Callable[[], T], what: str, retries: int, backoff: float) -> T:
     """Call ``fn`` with exponential backoff; re-raise after ``retries`` failures."""
     for attempt in range(1, retries + 1):
         try:

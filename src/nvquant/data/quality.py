@@ -139,7 +139,9 @@ def build_report(cfg: Config, loaded: LoadedData) -> dict[str, object]:
         for t, events in KNOWN_SPLITS.items():
             if t in m.prices:
                 splits.extend(asdict(check_split(m.prices[t], t, d, f)) for d, f in events)
-    stale_flags = [q["ticker"] for q in tickers if int(q["max_stale_run"]) >= cfg.data.stale_run_threshold]
+    stale_flags = [
+        q["ticker"] for q in tickers if int(q["max_stale_run"]) >= cfg.data.stale_run_threshold
+    ]
     return {
         "mode": loaded.mode,
         "end": str(loaded.end.date()),
@@ -174,13 +176,25 @@ def render_markdown(report: dict[str, object]) -> str:
     ]
     for k, v in report["first_valid"].items():  # type: ignore[attr-defined]
         lines.append(f"| {k} | {v} |")
-    lines += ["", "## Split checks", "", "| ticker | date | factor | close ratio | open ratio | volume ratio | passed |", "|---|---|---|---|---|---|---|"]
+    lines += [
+        "",
+        "## Split checks",
+        "",
+        "| ticker | date | factor | close ratio | open ratio | volume ratio | passed |",
+        "|---|---|---|---|---|---|---|",
+    ]
     for s in report["split_checks"]:  # type: ignore[attr-defined]
         lines.append(
             f"| {s['ticker']} | {s['date']} | {s['factor']:g} | {s['close_ratio']:.3f} | "
             f"{s['open_ratio']:.3f} | {s['volume_ratio']:.3f} | {s['passed']} |"
         )
-    lines += ["", "## Per ticker", "", "| ticker | first | last | sessions | missing | off-calendar rows | longest stale run | outliers | suspect splits |", "|---|---|---|---|---|---|---|---|---|"]
+    lines += [
+        "",
+        "## Per ticker",
+        "",
+        "| ticker | first | last | sessions | missing | off-calendar rows | longest stale run | outliers | suspect splits |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
     for q in report["tickers"]:  # type: ignore[attr-defined]
         lines.append(
             f"| {q['ticker']} | {q['first']} | {q['last']} | {q['sessions_expected']} | "

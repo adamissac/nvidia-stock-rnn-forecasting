@@ -28,7 +28,9 @@ class ManifestEntry:
     last: str | None
 
 
-def entry_for(raw_dir: Path, file: Path, source: str, url: str, frame: pd.DataFrame) -> ManifestEntry:
+def entry_for(
+    raw_dir: Path, file: Path, source: str, url: str, frame: pd.DataFrame
+) -> ManifestEntry:
     """Build a manifest entry for a parquet file that was just written."""
     idx = pd.DatetimeIndex(frame.index) if len(frame) else pd.DatetimeIndex([])
     return ManifestEntry(
