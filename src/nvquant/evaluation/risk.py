@@ -12,7 +12,7 @@ from nvquant.evaluation.metrics import performance
 
 
 def var_historical(r: pd.Series, level: float, window: int) -> pd.Series:
-    """Rolling historical VaR (a positive loss number) known at t for day t+1."""
+    """Rolling historical VaR (a positive loss number) from returns up to ``r[t]``."""
     return -r.rolling(window, min_periods=window).quantile(1 - level)
 
 
@@ -70,13 +70,19 @@ def _xlogy(x: float, y: float) -> float:
     return 0.0 if x == 0 else x * np.log(y)
 
 
-def var_backtest(r: pd.Series, var: pd.Series, level: float) -> VaRBacktest:
-    """Exceptions are days with loss above the VaR forecast made the day before.
+def var_backtest(r: pd.Series, var: pd.Series, level: float, lag: int = 2) -> VaRBacktest:
+    """Exceptions are days whose loss exceeds the VaR that was known at the decision.
+
+    ``r`` is indexed by decision date, and ``r[t]`` is realized at the open of
+    t+2. A rolling VaR computed on returns up to ``r[t]`` is therefore only
+    available for the decision at t+2, so rolling methods use ``lag=2``. The
+    GARCH VaR is built from the position and variance forecast at t, so it
+    applies to ``r[t]`` directly (``lag=0``).
 
     Kupiec (1995) tests the exception rate; Christoffersen (1998) tests
     independence of exceptions and conditional coverage.
     """
-    df = pd.concat({"r": r, "v": var.shift(1)}, axis=1).dropna()
+    df = pd.concat({"r": r, "v": var.shift(lag)}, axis=1).dropna()
     df = df[df["v"] > 0]
     hit = (-df["r"] > df["v"]).astype(int).to_numpy()
     n, x = len(hit), int(hit.sum())
@@ -119,7 +125,10 @@ def var_suite(
             "garch": var_garch(position, var_forecast, lvl),
         }
         out[f"{lvl:g}"] = {
-            "backtests": {k: asdict(var_backtest(r, v, lvl)) for k, v in methods.items()},
+            "backtests": {
+                k: asdict(var_backtest(r, v, lvl, lag=0 if k == "garch" else 2))
+                for k, v in methods.items()
+            },
             "mean_var": {k: float(v.mean()) for k, v in methods.items()},
             "mean_cvar_historical": float(cvar_historical(r, lvl, window).mean()),
         }

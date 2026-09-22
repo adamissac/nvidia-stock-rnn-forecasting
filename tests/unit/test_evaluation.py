@@ -116,6 +116,11 @@ def test_var_backtests():
         "garch",
     }
     assert np.isnan(var_backtest(r.iloc[:10], v.iloc[:10], 0.99).rate)
+    # lag=0 compares r[t] with the VaR stamped at t; lag=2 with the VaR stamped at t-2
+    rr = pd.Series([-0.05, 0.0, 0.0, 0.0] * 10, index=IDX[:40])
+    vv = pd.Series([0.01, 0.01, 0.10, 0.01] * 10, index=IDX[:40])
+    assert var_backtest(rr, vv, 0.99, lag=0).exceptions == 10  # the loss day's own VaR is small
+    assert var_backtest(rr, vv, 0.99, lag=2).exceptions == 0  # the VaR from two days earlier is big
 
 
 def test_stress_regimes_monte_carlo():
