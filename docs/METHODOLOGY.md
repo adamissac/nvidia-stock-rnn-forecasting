@@ -144,7 +144,7 @@ Sharpe ratios in these formulas are per period (daily), $\widehat{SR} = \bar r /
 - Named stress windows before 2025 (the 2008 crisis, Q4 2018, February to March 2020, the 2022 drawdown). Any window before the first out-of-sample date is marked as not covered.
 - Performance split by the filtered HMM regime and by calendar year, including the share of total return earned in 2023 and 2024.
 - Monte Carlo of the equity path with a stationary block bootstrap: quantiles of terminal wealth and drawdown.
-- Attribution: OLS of the strategy's excess return on QQQ, on SMH, and on FF5 plus momentum, with Newey-West errors. The factor return for session $t+1$ stands in for the holding period, which straddles two sessions. That biases betas toward zero, not toward false alpha.
+- Attribution: OLS of the strategy's excess return with Newey-West errors. The QQQ and SMH regressions are daily and use those ETFs' own open-to-open returns over the same holding periods, so they're aligned exactly. Fama-French factors are close-to-close, which only half-overlaps an open-to-open holding day. A daily regression shrinks the market beta and moves the market premium into the intercept, which inflates alpha. So the FF5 plus momentum regression runs on calendar-month compounded returns, where the offset only matters at month edges, and alpha is annualized by 12.
 - **Peer study:** the same pipeline, with nothing changed, on each of the ten peers over the development period, using the best strategy's sizing rule and the pre-chosen peer models.
 
 ## 11. Feature importance
