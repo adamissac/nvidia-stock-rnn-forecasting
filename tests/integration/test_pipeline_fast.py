@@ -48,6 +48,21 @@ def test_full_fast_pipeline(fast_yaml):
     ]
     kinds = {r["kind"] for r in rows}
     assert {"model", "tuning", "strategy", "vol", "v1_replica", "peer"} <= kinds
+    # nothing the development run wrote reaches into the lockbox period
+    cut = results["meta"]["oos_end"]
+    import pandas as pd
+
+    lock_start = pd.Timestamp("2023-01-03")  # fast.yaml lockbox.start
+    assert pd.Timestamp(cut) < lock_start
+    for f in (base / "reports" / "forecasts").glob("*.parquet"):
+        assert pd.read_parquet(f).index.max() < lock_start, f
+    assert pd.read_parquet(base / "reports" / "backtest" / "net.parquet").index.max() < lock_start
+    assert pd.read_parquet(base / "data" / "features" / "features.parquet").index.max() < lock_start
+    # the README block is rendered from results.json
+    readme = (base / "README.md").read_text()
+    from nvquant.reporting.readme import fmt
+
+    assert fmt(results["headline"]["best_sharpe"]) in readme
     # the synthetic target has a planted reversal signal, so a linear model should find it
     assert max(results["forecasts"][m]["ic"] for m in ("ridge", "elastic_net")) > 0.05
 
@@ -57,7 +72,7 @@ def test_full_fast_pipeline(fast_yaml):
     again = runner.invoke(app, ["lockbox", "--config", str(fast_yaml)])
     assert again.exit_code != 0 and "already evaluated" in str(again.exception)
     forced = runner.invoke(app, ["lockbox", "--config", str(fast_yaml), "--force"])
-    assert forced.exit_code != 0
+    assert forced.exit_code != 0 and "non-empty --reason" in str(forced.exception)
     report = runner.invoke(app, ["report", "--config", str(fast_yaml)])
     assert report.exit_code == 0
     results = json.loads((base / "reports" / "results.json").read_text())
@@ -76,3 +91,14 @@ def test_app_renders_from_reports(fast_yaml, monkeypatch):
     at.run()
     assert not at.exception
     assert at.title[0].value.endswith("out-of-sample strategies")
+
+
+def test_train_only_trains_the_named_model(fast_yaml, tmp_path_factory):
+    runner = CliRunner()
+    base = fast_yaml.parent
+    before = {p.name for p in (base / "reports" / "forecasts").glob("*.parquet")}
+    stamp = (base / "reports" / "forecasts" / "ridge.parquet").stat().st_mtime
+    res = runner.invoke(app, ["train", "--config", str(fast_yaml), "--only", "ridge"])
+    assert res.exit_code == 0, res.output
+    assert {p.name for p in (base / "reports" / "forecasts").glob("*.parquet")} == before
+    assert (base / "reports" / "forecasts" / "ridge.parquet").stat().st_mtime > stamp
