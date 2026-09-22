@@ -19,3 +19,10 @@ def test_inject_and_extract(tmp_path):
     p.write_text("no markers")
     with pytest.raises(ValueError):
         inject(p, "x")
+
+
+def test_build_results_refuses_missing_inputs(tmp_path, fast_cfg):
+    from nvquant.reporting.results import build_results
+
+    with pytest.raises(FileNotFoundError, match=r"data_quality\.json"):
+        build_results(fast_cfg, tmp_path)

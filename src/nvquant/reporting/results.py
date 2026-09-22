@@ -84,6 +84,11 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
     bt = _read(reports / "backtest" / "strategies.json")
     lock = _read(reports / "lockbox" / "results.json")
     sentinel = _read(reports / "lockbox" / "SENTINEL.json")
+    missing = [n for n, v in (("data_quality.json", dq), ("evaluation/strategies.json", strat),
+                               ("evaluation/forecasts.json", fc), ("evaluation/risk.json", risk),
+                               ("backtest/strategies.json", bt)) if v is None]  # fmt: skip
+    if missing:
+        raise FileNotFoundError(f"cannot build results.json; missing {missing} (run the earlier stages)")
     sweep = pd.read_parquet(reports / "backtest" / "cost_sweep.parquet")
     capacity = pd.read_parquet(reports / "backtest" / "capacity.parquet")
     best = strat["best"]
@@ -122,15 +127,15 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
             "git_sha": git_sha(),
             "config_hash": config_hash(cfg),
             "profile": cfg.profile,
-            "data_hash": dq["data_hash"] if dq else None,
-            "modeling_start": dq["modeling_start"] if dq else None,
+            "data_hash": dq["data_hash"],
+            "modeling_start": dq["modeling_start"],
             "oos_start": bt["first_date"],
             "oos_end": bt["last_date"],
             "oos_days": bt["n_dates"],
             "n_strategy_trials": strat["n_trials"],
             "n_all_fits": strat["n_all_fits"],
             "engine_max_abs_diff": bt["engine_max_abs_diff"],
-            "split_checks_passed": dq["split_checks_passed"] if dq else None,
+            "split_checks_passed": dq["split_checks_passed"],
             "target": cfg.universe.target,
             "n_features": (_read(reports / "features_info.json") or {}).get("n_features"),
         },
