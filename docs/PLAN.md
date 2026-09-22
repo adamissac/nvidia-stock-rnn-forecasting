@@ -74,7 +74,7 @@ Trade-offs made to fit the budget:
 Acceptance: the files exist, `python3 .claude/skills/leakage-guard/scripts/leakage_lint.py` runs, and the hook exits 0 on a non-Python payload. The branch is pushed.
 
 ### Phase 1: foundation
-Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli}.py`, `src/nvquant/config/`, `src/nvquant/experiments/repro.py`, `src/nvquant/logging_utils.py`, `src/nvquant/data/synthetic.py`, `configs/{base,fast,full}.yaml`, `Makefile`, `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `legacy/` (git mv of the notebook and download script), `tests/unit/test_{config,synthetic,repro,leakage_lint}.py`.
+Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli,logging_utils}.py`, `src/nvquant/config/{__init__,schema}.py`, `src/nvquant/experiments/repro.py`, `src/nvquant/data/{market,calendar,synthetic}.py`, `configs/{base,fast,full}.yaml`, `Makefile`, `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `scripts/macos_libomp.py`, `legacy/` (git mv of the notebook, download script, and requirements), `tests/unit/test_{config,synthetic,repro,leakage_lint}.py`.
 - [ ] uv project (Python 3.12), src layout, typer CLI `nvquant`, CPU torch wheels on Linux CI
 - [ ] pydantic config with base plus profile merge, and a config hash
 - [ ] Seeding for python, numpy, and torch, deterministic torch, device detection, git SHA, file hashing
@@ -87,7 +87,7 @@ Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli}.py`, `src/nvquan
 Acceptance: `make ci` passes locally and GitHub Actions is green on the branch.
 
 ### Phase 2: data
-Files: `src/nvquant/data/{universe,yahoo,fred,french,earnings,calendar,schemas,manifest,quality,loader}.py`, `reports/data_quality.{json,md}`.
+Files: `src/nvquant/data/{sources,schemas,manifest,loader,quality}.py` (the universe lives in `config/schema.py`; `sources.py` holds the Yahoo, FRED, Ken French, and earnings downloaders), `reports/data_quality.{json,md}`, `tests/unit/test_data.py`.
 - [ ] yfinance download with `multi_level_index=False`, `auto_adjust=True`, retries with backoff, parquet cache
 - [ ] FRED DGS10 and DGS2 from the keyless CSV endpoint
 - [ ] Ken French FF5 plus momentum daily zips
@@ -100,7 +100,7 @@ Files: `src/nvquant/data/{universe,yahoo,fred,french,earnings,calendar,schemas,m
 Acceptance: `make data data-report` works from an empty cache, the split checks pass, and the loader tests (offline, on fixtures) pass.
 
 ### Phase 3: features and labels
-Files: `src/nvquant/features/{registry,returns,volatility,technical,volume,cross_asset,macro,calendar_feats,fracdiff,fitted,store,docs}.py`, `src/nvquant/labels/{forward,triple_barrier,meta,weights}.py`, `docs/FEATURES.md` (generated), `tests/property/test_feature_causality.py`, `tests/property/test_labels.py`.
+Files: `src/nvquant/features/{registry,price,cross_asset,calendar_feats,fracdiff,fitted,store,docs}.py`, `src/nvquant/models/regime.py` (the HMM behind the regime feature), `src/nvquant/labels/{forward,triple_barrier,weights}.py` (meta-labels live in `triple_barrier.py`), `docs/FEATURES.md` (generated), `tests/property/test_{feature_causality,labels_property}.py`, `tests/unit/test_{features,labels}.py`.
 - [ ] All spec feature groups with lookback and lag metadata
 - [ ] Fracdiff (fixed width) with the minimum `d` passing ADF, chosen on training data only
 - [ ] Labels: forward 1/5/21 log returns, vol-normalized, triple barrier, meta-labels, uniqueness weights; every label has `t_end`
@@ -110,7 +110,7 @@ Files: `src/nvquant/features/{registry,returns,volatility,technical,volume,cross
 Acceptance: the property tests pass with at least 50 hypothesis examples per feature, and `make features` writes the store and docs/FEATURES.md.
 
 ### Phase 4: validation framework
-Files: `src/nvquant/cv/{splits,purging,lockbox}.py`, `src/nvquant/experiments/{registry,tuning,harness}.py`, `tests/property/test_cv_purging.py`.
+Files: `src/nvquant/cv/{splits,lockbox}.py` (purging lives in `splits.py`), `src/nvquant/experiments/{registry,tuning,harness}.py`, `tests/property/test_cv_purging.py`, `tests/unit/test_{cv,registry}.py`.
 - [ ] Expanding and rolling walk-forward with configurable retrain frequency
 - [ ] Purged k-fold with embargo; CPCV with path reconstruction
 - [ ] Lockbox guard and sentinel with `--force --reason`
@@ -121,7 +121,7 @@ Files: `src/nvquant/cv/{splits,purging,lockbox}.py`, `src/nvquant/experiments/{r
 Acceptance: the property tests pass, and a harness run on synthetic data writes registry rows.
 
 ### Phase 5: models
-Files: `src/nvquant/models/{base,factory,baselines,linear,trees,volatility,regime,ensemble,v1_replica}.py`, `src/nvquant/models/deep/{nets,heads,train}.py`, `src/nvquant/evaluation/forecast.py`, `docs/V1_POSTMORTEM.md`.
+Files: `src/nvquant/models/{base,factory,baselines,linear,trees,volatility,ensemble,v1_replica}.py`, `src/nvquant/models/deep/{nets,train}.py` (heads live in `nets.py`), `src/nvquant/evaluation/forecast.py`, `docs/V1_POSTMORTEM.md`, `tests/unit/test_{models,volatility}.py`.
 - [ ] Baselines: zero, historical mean, AR(p); ridge, elastic net; LightGBM
 - [ ] Deep: LSTM and GRU (Gaussian NLL and quantile heads), TCN, PatchTST-lite; one training loop with early stopping, gradient clipping, and seed ensembles
 - [ ] v1 replica against a persistence forecast
@@ -134,7 +134,7 @@ Files: `src/nvquant/models/{base,factory,baselines,linear,trees,volatility,regim
 Acceptance: `make train` finishes within budget, every model has OOS forecasts over the whole dev OOS range, and the recovery tests pass.
 
 ### Phase 6: strategy and backtest
-Files: `src/nvquant/portfolio/{sizing,meta_labeling}.py`, `src/nvquant/backtest/{costs,vectorized,event,benchmarks,strategies}.py`.
+Files: `src/nvquant/portfolio/{sizing,meta_labeling}.py`, `src/nvquant/backtest/{costs,vectorized,event,benchmarks,strategies}.py`, `tests/unit/test_backtest_engines.py`.
 - [ ] Threshold and scaled signals, vol targeting, fractional Kelly with caps, regime filter, meta-labeling
 - [ ] Next-open execution; the full cost model; 0 to 20 bps sweep; capacity sweep
 - [ ] Vectorized and event-driven engines agree to 1e-10 (tested)
@@ -144,7 +144,7 @@ Files: `src/nvquant/portfolio/{sizing,meta_labeling}.py`, `src/nvquant/backtest/
 Acceptance: the engine agreement and invariant tests pass, and `make backtest` writes the strategy return matrix and registers every config.
 
 ### Phase 7: evaluation and risk
-Files: `src/nvquant/evaluation/{metrics,significance,attribution,risk,importance,peers}.py`.
+Files: `src/nvquant/evaluation/{metrics,significance,attribution,risk,importance}.py`, `src/nvquant/experiments/pipeline.py` (peer study, CPCV paths, and every stage), `tests/unit/test_{significance,evaluation}.py`, `tests/integration/test_pipeline_fast.py`.
 - [ ] Performance metrics, including rolling Sharpe and IC
 - [ ] PSR, DSR, PBO (CSCV), SPA, White RC, bootstrap CIs, MinTRL; hand-computed unit tests
 - [ ] Attribution on QQQ, SMH, and FF5 plus momentum with Newey-West

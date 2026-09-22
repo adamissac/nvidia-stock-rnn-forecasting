@@ -1,17 +1,32 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, quant-overhaul]
   pull_request:
     branches: [main]
+
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.12"
-      - run: pip install -r requirements.txt
-      - run: python -m compileall -q .
-      - run: python -m unittest discover -s tests -v
+          enable-cache: true
+      - name: Install Python 3.12
+        run: uv python install 3.12
+      - name: Sync (CPU torch wheels on Linux)
+        run: uv sync --all-extras --frozen
+      - name: ruff
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+      - name: leakage lint
+        run: uv run python .claude/skills/leakage-guard/scripts/leakage_lint.py src/nvquant
+      - name: mypy
+        run: uv run mypy
+      - name: pytest (coverage >= 85%, no network)
+        run: uv run pytest
+      - name: end-to-end smoke run on synthetic data
+        run: make smoke

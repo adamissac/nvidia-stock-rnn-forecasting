@@ -1,0 +1,117 @@
+[project]
+name = "nvquant"
+version = "2.0.0"
+description = "Out-of-sample research on forecasting and trading daily NVDA returns, with purged validation, transaction costs, and trial-adjusted statistics."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Adam Issac" }]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy>=2.1",
+    "pandas>=2.2",
+    "scipy>=1.14",
+    "statsmodels>=0.14.4",
+    "scikit-learn>=1.6",
+    "lightgbm>=4.5",
+    "torch>=2.5",
+    "arch>=7.2",
+    "optuna>=4.1",
+    "pandera>=0.22",
+    "hmmlearn>=0.3.3",
+    "exchange-calendars>=4.6",
+    "yfinance>=0.2.54",
+    "pyarrow>=18",
+    "pydantic>=2.9",
+    "pyyaml>=6",
+    "typer>=0.15",
+    "requests>=2.32",
+    "matplotlib>=3.9",
+    "markdown-it-py>=4.2.0",
+]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.40", "altair>=5"]
+
+[project.scripts]
+nvquant = "nvquant.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6",
+    "hypothesis>=6.120",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pandas-stubs>=2.2",
+    "types-PyYAML",
+    "types-requests",
+    "scipy-stubs",
+    "pre-commit>=4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nvquant"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["legacy"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "NPY", "RUF", "SIM", "D"]
+ignore = ["D105", "D107", "D203", "D205", "D213", "D401", "D413", "E501", "RUF001", "RUF002", "RUF003", "B905"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"app/**" = ["D"]
+"scripts/**" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/nvquant"]
+strict = true
+warn_unused_ignores = false
+disallow_untyped_calls = false
+disallow_any_generics = false
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+# pandas-stubs and numpy's stubs type many valid pandas/numpy calls as errors (np.log(Series)
+# returns ndarray, Series arithmetic, overloaded indexers). These four codes are almost all
+# stub noise in this codebase, so they're off; everything else in strict mode stays on.
+disable_error_code = ["arg-type", "no-any-return", "operator", "call-overload"]
+
+[[tool.mypy.overrides]]
+module = ["nvquant.models.deep.*"]
+disallow_untyped_calls = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --cov=src/nvquant --cov-report=term-missing:skip-covered --cov-fail-under=85"
+markers = ["slow: slower tests (still offline)"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+
+[tool.coverage.run]
+source = ["src/nvquant"]
+branch = false
+omit = ["src/nvquant/data/sources.py"]
+
+[tool.coverage.report]
+exclude_also = ["if __name__ == .__main__.:", "raise NotImplementedError"]
