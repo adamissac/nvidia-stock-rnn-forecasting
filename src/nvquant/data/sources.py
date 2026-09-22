@@ -44,6 +44,13 @@ def with_retries[T](fn: Callable[[], T], what: str, retries: int, backoff: float
     raise RuntimeError("unreachable")
 
 
+def _check_coerced(raw: pd.Series, parsed: pd.Series, what: str, max_share: float = 0.001) -> None:
+    """Raise if more than ``max_share`` of the non-blank raw values failed to parse as numbers."""
+    bad = int((raw.notna() & parsed.isna()).sum())
+    if bad > max_share * max(len(raw), 1):
+        raise ValueError(f"{what}: {bad} of {len(raw)} values aren't numbers; did the format change?")
+
+
 def normalize_yahoo(frame: pd.DataFrame) -> pd.DataFrame:
     """Lowercase OHLCV columns on a tz-naive date index, sorted ascending, no duplicates."""
     if isinstance(frame.columns, pd.MultiIndex):
@@ -83,8 +90,10 @@ def parse_fred_csv(text: str, series: str) -> pd.Series:
     """Parse FRED's ``fredgraph.csv`` (blank or '.' means missing)."""
     df = pd.read_csv(io.StringIO(text), na_values=[".", ""])
     date_col = df.columns[0]
+    values = pd.to_numeric(df[series], errors="coerce")
+    _check_coerced(df[series], values, f"FRED {series}")
     out = pd.Series(
-        pd.to_numeric(df[series], errors="coerce").to_numpy(),
+        values.to_numpy(),
         index=pd.DatetimeIndex(pd.to_datetime(df[date_col]), name="date"),
         name=series,
     )
@@ -117,7 +126,11 @@ def parse_french_csv(text: str) -> pd.DataFrame:
         rows.append(parts)
     df = pd.DataFrame(rows, columns=["date", *header[1:]])
     df.index = pd.DatetimeIndex(pd.to_datetime(df.pop("date"), format="%Y%m%d"), name="date")
-    df = df.apply(pd.to_numeric, errors="coerce").replace([-99.99, -999.0], np.nan) / 100.0
+    raw = df.copy()
+    df = df.apply(pd.to_numeric, errors="coerce")
+    for col in df.columns:
+        _check_coerced(raw[col].replace("", np.nan), df[col], f"Ken French {col}")
+    df = df.replace([-99.99, -999.0], np.nan) / 100.0
     rename = {"Mkt-RF": "mkt_rf", "SMB": "smb", "HML": "hml", "RMW": "rmw", "CMA": "cma",
               "RF": "rf", "Mom": "mom", "MOM": "mom", "WML": "mom"}  # fmt: skip
     return df.rename(columns=lambda c: rename.get(c, c.lower()))
