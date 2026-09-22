@@ -1,0 +1,603 @@
+{
+  "specs": {
+    "ar__sign": {
+      "name": "ar__sign",
+      "kind": "model",
+      "forecast": "ar",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "ar__scaled": {
+      "name": "ar__scaled",
+      "kind": "model",
+      "forecast": "ar",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "ar__voltarget": {
+      "name": "ar__voltarget",
+      "kind": "model",
+      "forecast": "ar",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "ar__kelly": {
+      "name": "ar__kelly",
+      "kind": "model",
+      "forecast": "ar",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "ar__sign_ls": {
+      "name": "ar__sign_ls",
+      "kind": "model",
+      "forecast": "ar",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "ar__voltarget_regime": {
+      "name": "ar__voltarget_regime",
+      "kind": "model",
+      "forecast": "ar",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "elastic_net__sign": {
+      "name": "elastic_net__sign",
+      "kind": "model",
+      "forecast": "elastic_net",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "elastic_net__scaled": {
+      "name": "elastic_net__scaled",
+      "kind": "model",
+      "forecast": "elastic_net",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "elastic_net__voltarget": {
+      "name": "elastic_net__voltarget",
+      "kind": "model",
+      "forecast": "elastic_net",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "elastic_net__kelly": {
+      "name": "elastic_net__kelly",
+      "kind": "model",
+      "forecast": "elastic_net",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "elastic_net__sign_ls": {
+      "name": "elastic_net__sign_ls",
+      "kind": "model",
+      "forecast": "elastic_net",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "elastic_net__voltarget_regime": {
+      "name": "elastic_net__voltarget_regime",
+      "kind": "model",
+      "forecast": "elastic_net",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "ens_equal__sign": {
+      "name": "ens_equal__sign",
+      "kind": "model",
+      "forecast": "ens_equal",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "ens_equal__scaled": {
+      "name": "ens_equal__scaled",
+      "kind": "model",
+      "forecast": "ens_equal",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "ens_equal__voltarget": {
+      "name": "ens_equal__voltarget",
+      "kind": "model",
+      "forecast": "ens_equal",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "ens_equal__kelly": {
+      "name": "ens_equal__kelly",
+      "kind": "model",
+      "forecast": "ens_equal",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "ens_equal__sign_ls": {
+      "name": "ens_equal__sign_ls",
+      "kind": "model",
+      "forecast": "ens_equal",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "ens_equal__voltarget_regime": {
+      "name": "ens_equal__voltarget_regime",
+      "kind": "model",
+      "forecast": "ens_equal",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "ens_stack__sign": {
+      "name": "ens_stack__sign",
+      "kind": "model",
+      "forecast": "ens_stack",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "ens_stack__scaled": {
+      "name": "ens_stack__scaled",
+      "kind": "model",
+      "forecast": "ens_stack",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "ens_stack__voltarget": {
+      "name": "ens_stack__voltarget",
+      "kind": "model",
+      "forecast": "ens_stack",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "ens_stack__kelly": {
+      "name": "ens_stack__kelly",
+      "kind": "model",
+      "forecast": "ens_stack",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "ens_stack__sign_ls": {
+      "name": "ens_stack__sign_ls",
+      "kind": "model",
+      "forecast": "ens_stack",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "ens_stack__voltarget_regime": {
+      "name": "ens_stack__voltarget_regime",
+      "kind": "model",
+      "forecast": "ens_stack",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "gru_gauss__sign": {
+      "name": "gru_gauss__sign",
+      "kind": "model",
+      "forecast": "gru_gauss",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "gru_gauss__scaled": {
+      "name": "gru_gauss__scaled",
+      "kind": "model",
+      "forecast": "gru_gauss",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "gru_gauss__voltarget": {
+      "name": "gru_gauss__voltarget",
+      "kind": "model",
+      "forecast": "gru_gauss",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "gru_gauss__kelly": {
+      "name": "gru_gauss__kelly",
+      "kind": "model",
+      "forecast": "gru_gauss",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "gru_gauss__sign_ls": {
+      "name": "gru_gauss__sign_ls",
+      "kind": "model",
+      "forecast": "gru_gauss",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "gru_gauss__voltarget_regime": {
+      "name": "gru_gauss__voltarget_regime",
+      "kind": "model",
+      "forecast": "gru_gauss",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "gru_quant__sign": {
+      "name": "gru_quant__sign",
+      "kind": "model",
+      "forecast": "gru_quant",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "gru_quant__scaled": {
+      "name": "gru_quant__scaled",
+      "kind": "model",
+      "forecast": "gru_quant",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "gru_quant__voltarget": {
+      "name": "gru_quant__voltarget",
+      "kind": "model",
+      "forecast": "gru_quant",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "gru_quant__kelly": {
+      "name": "gru_quant__kelly",
+      "kind": "model",
+      "forecast": "gru_quant",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "gru_quant__sign_ls": {
+      "name": "gru_quant__sign_ls",
+      "kind": "model",
+      "forecast": "gru_quant",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "gru_quant__voltarget_regime": {
+      "name": "gru_quant__voltarget_regime",
+      "kind": "model",
+      "forecast": "gru_quant",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "hist_mean__sign": {
+      "name": "hist_mean__sign",
+      "kind": "model",
+      "forecast": "hist_mean",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "hist_mean__scaled": {
+      "name": "hist_mean__scaled",
+      "kind": "model",
+      "forecast": "hist_mean",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "hist_mean__voltarget": {
+      "name": "hist_mean__voltarget",
+      "kind": "model",
+      "forecast": "hist_mean",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "hist_mean__kelly": {
+      "name": "hist_mean__kelly",
+      "kind": "model",
+      "forecast": "hist_mean",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "hist_mean__sign_ls": {
+      "name": "hist_mean__sign_ls",
+      "kind": "model",
+      "forecast": "hist_mean",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "hist_mean__voltarget_regime": {
+      "name": "hist_mean__voltarget_regime",
+      "kind": "model",
+      "forecast": "hist_mean",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "lgbm__sign": {
+      "name": "lgbm__sign",
+      "kind": "model",
+      "forecast": "lgbm",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "lgbm__scaled": {
+      "name": "lgbm__scaled",
+      "kind": "model",
+      "forecast": "lgbm",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "lgbm__voltarget": {
+      "name": "lgbm__voltarget",
+      "kind": "model",
+      "forecast": "lgbm",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "lgbm__kelly": {
+      "name": "lgbm__kelly",
+      "kind": "model",
+      "forecast": "lgbm",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "lgbm__sign_ls": {
+      "name": "lgbm__sign_ls",
+      "kind": "model",
+      "forecast": "lgbm",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "lgbm__voltarget_regime": {
+      "name": "lgbm__voltarget_regime",
+      "kind": "model",
+      "forecast": "lgbm",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "lstm_gauss__sign": {
+      "name": "lstm_gauss__sign",
+      "kind": "model",
+      "forecast": "lstm_gauss",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "lstm_gauss__scaled": {
+      "name": "lstm_gauss__scaled",
+      "kind": "model",
+      "forecast": "lstm_gauss",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "lstm_gauss__voltarget": {
+      "name": "lstm_gauss__voltarget",
+      "kind": "model",
+      "forecast": "lstm_gauss",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "lstm_gauss__kelly": {
+      "name": "lstm_gauss__kelly",
+      "kind": "model",
+      "forecast": "lstm_gauss",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "lstm_gauss__sign_ls": {
+      "name": "lstm_gauss__sign_ls",
+      "kind": "model",
+      "forecast": "lstm_gauss",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "lstm_gauss__voltarget_regime": {
+      "name": "lstm_gauss__voltarget_regime",
+      "kind": "model",
+      "forecast": "lstm_gauss",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "lstm_quant__sign": {
+      "name": "lstm_quant__sign",
+      "kind": "model",
+      "forecast": "lstm_quant",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "lstm_quant__scaled": {
+      "name": "lstm_quant__scaled",
+      "kind": "model",
+      "forecast": "lstm_quant",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "lstm_quant__voltarget": {
+      "name": "lstm_quant__voltarget",
+      "kind": "model",
+      "forecast": "lstm_quant",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "lstm_quant__kelly": {
+      "name": "lstm_quant__kelly",
+      "kind": "model",
+      "forecast": "lstm_quant",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "lstm_quant__sign_ls": {
+      "name": "lstm_quant__sign_ls",
+      "kind": "model",
+      "forecast": "lstm_quant",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "lstm_quant__voltarget_regime": {
+      "name": "lstm_quant__voltarget_regime",
+      "kind": "model",
+      "forecast": "lstm_quant",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "patchtst__sign": {
+      "name": "patchtst__sign",
+      "kind": "model",
+      "forecast": "patchtst",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "patchtst__scaled": {
+      "name": "patchtst__scaled",
+      "kind": "model",
+      "forecast": "patchtst",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "patchtst__voltarget": {
+      "name": "patchtst__voltarget",
+      "kind": "model",
+      "forecast": "patchtst",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "patchtst__kelly": {
+      "name": "patchtst__kelly",
+      "kind": "model",
+      "forecast": "patchtst",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "patchtst__sign_ls": {
+      "name": "patchtst__sign_ls",
+      "kind": "model",
+      "forecast": "patchtst",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "patchtst__voltarget_regime": {
+      "name": "patchtst__voltarget_regime",
+      "kind": "model",
+      "forecast": "patchtst",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "ridge__sign": {
+      "name": "ridge__sign",
+      "kind": "model",
+      "forecast": "ridge",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "ridge__scaled": {
+      "name": "ridge__scaled",
+      "kind": "model",
+      "forecast": "ridge",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "ridge__voltarget": {
+      "name": "ridge__voltarget",
+      "kind": "model",
+      "forecast": "ridge",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "ridge__kelly": {
+      "name": "ridge__kelly",
+      "kind": "model",
+      "forecast": "ridge",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "ridge__sign_ls": {
+      "name": "ridge__sign_ls",
+      "kind": "model",
+      "forecast": "ridge",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "ridge__voltarget_regime": {
+      "name": "ridge__voltarget_regime",
+      "kind": "model",
+      "forecast": "ridge",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "tcn__sign": {
+      "name": "tcn__sign",
+      "kind": "model",
+      "forecast": "tcn",
+      "sizing": "sign",
+      "ticker": "NVDA"
+    },
+    "tcn__scaled": {
+      "name": "tcn__scaled",
+      "kind": "model",
+      "forecast": "tcn",
+      "sizing": "scaled",
+      "ticker": "NVDA"
+    },
+    "tcn__voltarget": {
+      "name": "tcn__voltarget",
+      "kind": "model",
+      "forecast": "tcn",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "tcn__kelly": {
+      "name": "tcn__kelly",
+      "kind": "model",
+      "forecast": "tcn",
+      "sizing": "kelly",
+      "ticker": "NVDA"
+    },
+    "tcn__sign_ls": {
+      "name": "tcn__sign_ls",
+      "kind": "model",
+      "forecast": "tcn",
+      "sizing": "sign_ls",
+      "ticker": "NVDA"
+    },
+    "tcn__voltarget_regime": {
+      "name": "tcn__voltarget_regime",
+      "kind": "model",
+      "forecast": "tcn",
+      "sizing": "voltarget_regime",
+      "ticker": "NVDA"
+    },
+    "meta__raw": {
+      "name": "meta__raw",
+      "kind": "meta",
+      "forecast": "meta",
+      "sizing": "raw",
+      "ticker": "NVDA"
+    },
+    "meta__voltarget": {
+      "name": "meta__voltarget",
+      "kind": "meta",
+      "forecast": "meta",
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "bh_target": {
+      "name": "bh_target",
+      "kind": "benchmark",
+      "forecast": null,
+      "sizing": null,
+      "ticker": "NVDA"
+    },
+    "bh_voltarget": {
+      "name": "bh_voltarget",
+      "kind": "benchmark",
+      "forecast": null,
+      "sizing": "voltarget",
+      "ticker": "NVDA"
+    },
+    "trend_200": {
+      "name": "trend_200",
+      "kind": "benchmark",
+      "forecast": null,
+      "sizing": null,
+      "ticker": "NVDA"
+    },
+    "bh_smh": {
+      "name": "bh_smh",
+      "kind": "benchmark",
+      "forecast": null,
+      "sizing": null,
+      "ticker": "SMH"
+    },
+    "bh_qqq": {
+      "name": "bh_qqq",
+      "kind": "benchmark",
+      "forecast": null,
+      "sizing": null,
+      "ticker": "QQQ"
+    }
+  },
+  "engine_max_abs_diff": 1.3877787807814457e-17,
+  "first_date": "2009-07-22",
+  "last_date": "2024-12-31",
+  "n_dates": 3884
+}
