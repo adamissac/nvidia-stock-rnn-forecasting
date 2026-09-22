@@ -177,7 +177,7 @@ Acceptance: every finding has a commit that fixes it or a line in docs/RESEARCH_
 - [x] docs/PREREGISTRATION.md committed before the lockbox run
 - [x] `make lockbox` run exactly once; sentinel committed
 - [x] 2025 stress windows reported from the lockbox run only
-- [ ] `make reproduce` from a fresh clone
+- [x] `make reproduce` from a fresh clone
 - [ ] results refreshed, PR opened with gh, then merged into main
 
 Acceptance: the sentinel shows one run, its timestamp is after the preregistration commit, and the PR is merged.
