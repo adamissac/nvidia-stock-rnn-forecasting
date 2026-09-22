@@ -57,7 +57,7 @@ def render_results_block(res: dict[str, Any]) -> str:
     ]
     for name, r in res["strategies"].items():
         ci = f"{fmt(r['sharpe'])} [{fmt(r['sharpe_ci_lo'])}, {fmt(r['sharpe_ci_hi'])}]"
-        dsr = fmt(r["dsr"]) if r["kind"] != "benchmark" else "benchmark"
+        dsr = fmt(r["dsr"])
         lines.append(
             f"| {label(name, t)} | {ci} | {fmt(r['cagr'], '.1f', True)} | {fmt(r['ann_vol'], '.1f', True)} | "
             f"{fmt(r['max_drawdown'], '.1f', True)} | {fmt(r['turnover_ann'], '.1f')} | {dsr} |"
@@ -66,23 +66,27 @@ def render_results_block(res: dict[str, Any]) -> str:
         "",
         f"- Best development strategy: {label(h['best_strategy'], t)}. Its Sharpe minus the vol-targeted buy and hold's is "
         f"{fmt(h['best_minus_voltarget_sharpe'])}. DSR {fmt(h['best_dsr'])} (with every logged fit counted as a trial: "
-        f"{fmt(h['best_dsr_all_fits'])}).",
+        f"{fmt(h['best_dsr_all_fits'])}). The DSR asks whether a Sharpe beats what luck across the trials would produce; "
+        f"it doesn't compare against a benchmark, and vol-targeted buy and hold scores {fmt(res['strategies']['bh_voltarget']['dsr'])} "
+        "on the same test.",
         f"- Probability of backtest overfitting (CSCV): {fmt(h['pbo'])}. Hansen SPA p-value against vol-targeted buy and hold: "
-        f"{fmt(h['spa_vs_bh_voltarget'])}; against buy and hold: {fmt(h['spa_vs_bh_target'])}.",
-        f"- Random long/flat signals with the same turnover beat it {fmt(1 - h['random_null_percentile'], '.1f', True)} of the time.",
+        f"{fmt(h['spa_vs_bh_voltarget'])} on raw returns and {fmt(h['spa_vs_bh_voltarget_vol_matched'])} with every strategy "
+        f"scaled to the benchmark's volatility; against buy and hold: {fmt(h['spa_vs_bh_target'])}.",
+        f"- Random long/flat timing with the same exposure and switching rate, sized with the same vol target and costs, "
+        f"beats it {fmt(1 - h['random_null_percentile'], '.1f', True)} of the time.",
         f"- Fama-French 5 + momentum alpha: {fmt(h['alpha_ff5_ann'], '.1f', True)} a year (t = {fmt(h['alpha_ff5_t'])}). "
         f"2023 and 2024 account for {fmt(h['gain_share_2023_2024'], '.0f', True)} of its compounded dollar gain "
         f"({fmt(h['pnl_share_2023_2024'], '.0f', True)} of its summed daily returns).",
         "",
-        "| Forecast model | IC | IC t (NW) | R2 OOS vs zero | DM p vs zero | Hit rate |",
-        "|---|---|---|---|---|---|",
+        "| Forecast model | IC | IC t (NW) | R2 OOS vs zero | DM stat vs zero (negative = better) | DM p | Hit rate |",
+        "|---|---|---|---|---|---|---|",
     ]
     for name, f in res["forecasts"].items():
         if name == "zero":
             continue
         lines.append(
             f"| `{name}` | {fmt(f['ic'], '.3f')} | {fmt(f['ic_t'])} | {fmt(f['r2_oos'], '.2f', True)} | "
-            f"{fmt(f['dm_pvalue'], '.3f')} | {fmt(f['hit_rate'], '.1f', True)} |"
+            f"{fmt(f['dm_stat'])} | {fmt(f['dm_pvalue'], '.3f')} | {fmt(f['hit_rate'], '.1f', True)} |"
         )
     v1 = res.get("v1_replica")
     if v1:

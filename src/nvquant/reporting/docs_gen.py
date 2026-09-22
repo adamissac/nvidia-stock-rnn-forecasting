@@ -190,6 +190,7 @@ def render_results_md(res: dict[str, Any]) -> str:
                 "IC 21d",
                 "R2 vs zero",
                 "R2 vs hist mean",
+                "DM stat (neg = better)",
                 "DM p",
                 "hit rate",
                 "PT p",
@@ -204,6 +205,7 @@ def render_results_md(res: dict[str, Any]) -> str:
                     fmt((f["ic_decay"] or {}).get("21"), ".3f"),
                     fmt(f["r2_oos"], ".2f", True),
                     fmt(f["r2_oos_vs_hist_mean"], ".2f", True),
+                    fmt(f["dm_stat"]),
                     fmt(f["dm_pvalue"], ".3f"),
                     fmt(f["hit_rate"], ".1f", True),
                     fmt(f["pt_pvalue"], ".3f"),
@@ -262,7 +264,9 @@ def render_results_md(res: dict[str, Any]) -> str:
     for b, s in res["spa"].items():
         parts.append(
             f"- Against {label(b, t)}: SPA consistent p {fmt(s['spa_consistent'], '.3f')}, lower {fmt(s['spa_lower'], '.3f')}, "
-            f"upper {fmt(s['spa_upper'], '.3f')}; White's Reality Check p {fmt(s['reality_check'], '.3f')}."
+            f"upper {fmt(s['spa_upper'], '.3f')}; White's Reality Check p {fmt(s['reality_check'], '.3f')}. "
+            f"With every strategy scaled to the benchmark's volatility, SPA consistent p "
+            f"{fmt(s.get('vol_matched_spa_consistent'), '.3f')}."
         )
     rn = res["random_null"]
     parts += [

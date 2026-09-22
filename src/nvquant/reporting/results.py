@@ -149,6 +149,9 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
             "spa_vs_bh_voltarget": strat["spa"].get("bh_voltarget", {}).get("spa_consistent"),
             "spa_vs_bh_target": strat["spa"].get("bh_target", {}).get("spa_consistent"),
             "rc_vs_bh_voltarget": strat["spa"].get("bh_voltarget", {}).get("reality_check"),
+            "spa_vs_bh_voltarget_vol_matched": strat["spa"]
+            .get("bh_voltarget", {})
+            .get("vol_matched_spa_consistent"),
             "random_null_percentile": strat["random_null"]["best_percentile"],
             "alpha_ff5_ann": attribution[best]["FF5_MOM"].get("alpha_ann"),
             "alpha_ff5_t": attribution[best]["FF5_MOM"].get("alpha_t"),
