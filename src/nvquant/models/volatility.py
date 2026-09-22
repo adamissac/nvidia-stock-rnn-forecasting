@@ -174,7 +174,7 @@ class VolScore:
 
 
 def qlike(rv: np.ndarray, h: np.ndarray) -> float:
-    """QLIKE loss ``mean(rv/h - log(rv/h) - 1)``, robust to proxy noise (Patton 2011)."""
+    """QLIKE loss ``mean(rv/h - log(rv/h) - 1)``, which ranks forecasts consistently under proxy noise (Patton 2011)."""
     ratio = np.asarray(rv) / np.asarray(h)
     return float(np.mean(ratio - np.log(ratio) - 1))
 

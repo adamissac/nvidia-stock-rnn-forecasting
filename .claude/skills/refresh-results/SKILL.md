@@ -12,7 +12,8 @@ allowed-tools: Bash(make report) Bash(uv run *) Bash(git diff *)
    the README block between `<!-- RESULTS:START -->` and `<!-- RESULTS:END -->`.
 2. Check the block was regenerated, not hand-edited:
    `uv run python ${CLAUDE_SKILL_DIR}/scripts/check_readme_block.py`.
-   It exits 1 if the README block differs from what `results.json` renders to.
+   It exits 1 if any generated block (README, docs/RESULTS.md, and the marked blocks in
+   other docs) differs from what `results.json` renders to.
 3. Show `git diff --stat reports README.md`.
 4. Run the quant-reviewer agent on the diff. If it returns FAIL, fix the cause
    (usually a stale artifact or a claim in prose that no longer matches) and

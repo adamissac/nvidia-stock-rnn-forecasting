@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
+from typing import Any, cast
 
 import pandas as pd
 
@@ -102,7 +103,8 @@ def stage_features(cfg: Config) -> Path:
     docs.mkdir(parents=True, exist_ok=True)
     (docs / "FEATURES.md").write_text(render_feature_docs(store), encoding="utf-8")
     info = {k: v for k, v in store.info.items() if k != "fit_records"}
-    info["fracdiff_d"] = [r["summary"]["d"] for r in store.info["fit_records"] if r["feature"] == "fracdiff"]  # type: ignore[attr-defined,index]
+    records = cast(list[dict[str, Any]], store.info["fit_records"])
+    info["fracdiff_d"] = [r["summary"]["d"] for r in records if r["feature"] == "fracdiff"]
     _write_json(reports_dir(cfg) / "features_info.json", info)
     log.info(
         "feature store: %s (%d rows, %d features)",
@@ -789,7 +791,7 @@ def evaluate_cpcv(
 
     Unlike walk-forward, early test groups here are predicted by models that
     were trained partly on later data. That's by design (it gives many paths
-    through the same history), so these numbers are a robustness check, not
+    through the same history), so these numbers are a sensitivity check, not
     the headline.
     """
     import numpy as np
