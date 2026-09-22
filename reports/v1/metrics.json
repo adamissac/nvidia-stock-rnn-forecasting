@@ -12,6 +12,12 @@
     "dm_stat": 3.971435293684858,
     "dm_pvalue": 7.273440353598041e-05,
     "share_test_above_train_max": 0.49035245690764084,
+    "median_abs_error_model": 0.7539684588240902,
+    "median_abs_error_persistence": 0.022773479196476876,
+    "share_days_worse_than_persistence": 0.9217905839979419,
+    "share_days_blown_up": 0.10625160792384873,
+    "max_abs_prediction": 35829870592.0,
+    "max_open": 148.95033233522298,
     "n_parameters": 282101
   },
   "fits": [

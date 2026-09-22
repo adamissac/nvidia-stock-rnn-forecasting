@@ -7,7 +7,7 @@
   "n_features": 57,
   "data_hash": "e2fdd3b2b961",
   "config_hash": "ba8c37786f54",
-  "git_sha": "c876edd-dirty",
+  "git_sha": "1c299b6-dirty",
   "fitted_first_refit": {
     "fracdiff": "2009-07-16",
     "regime": "2009-07-16"
