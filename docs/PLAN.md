@@ -166,10 +166,10 @@ Files: `src/nvquant/reporting/{results,tearsheet,readme,figures}.py`, `app/strea
 Acceptance: the refresh-results check script passes, the app imports and renders headless, and docs contain no em dashes or hype words (tested).
 
 ### Phase 9: review and hardening
-- [ ] leakage-auditor PASS on `main...HEAD`
-- [ ] quant-reviewer PASS
-- [ ] silent-failure-hunter and pr-test-analyzer findings fixed or documented
-- [ ] /code-review findings fixed or documented
+- [x] leakage-auditor PASS on `main...HEAD`
+- [x] quant-reviewer PASS
+- [x] silent-failure-hunter and pr-test-analyzer findings fixed or documented
+- [x] /code-review findings fixed or documented
 
 Acceptance: every finding has a commit that fixes it or a line in docs/RESEARCH_LOG.md that explains why it wasn't fixed.
 
