@@ -1,0 +1,15 @@
+{
+  "runs": [
+    {
+      "opened_at": "2026-09-22T08:57:58+00:00",
+      "git_sha": "8f119f6",
+      "data_hash": "e2fdd3b2b961",
+      "config_hash": "ba8c37786f54",
+      "forced": false,
+      "reason": null,
+      "status": "completed",
+      "completed_at": "2026-09-22T08:58:17+00:00"
+    }
+  ],
+  "n_runs": 1
+}
