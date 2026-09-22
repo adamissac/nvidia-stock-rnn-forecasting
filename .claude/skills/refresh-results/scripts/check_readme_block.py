@@ -16,6 +16,10 @@ def main() -> int:
     res = load_results(Path("reports/results.json"))
     blocks = generated_blocks(res)
     stale = []
+    readme = Path("README.md").read_text(encoding="utf-8")
+    for required in ("RESULTS", "WHAT_DIDNT_WORK"):
+        if not has_block(readme, required):
+            stale.append(f"README.md is missing the {required} block")
     for path in [Path("README.md"), *sorted(Path("docs").glob("*.md"))]:
         text = path.read_text(encoding="utf-8")
         if path.name == "RESULTS.md":
