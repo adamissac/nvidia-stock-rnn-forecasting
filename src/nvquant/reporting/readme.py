@@ -110,6 +110,17 @@ def render_results_block(res: dict[str, Any]) -> str:
                 f"| {label(name, t)} | {fmt(r['sharpe'])} [{fmt(r['sharpe_ci_lo'])}, {fmt(r['sharpe_ci_hi'])}] | "
                 f"{fmt(r['total_return'], '.1f', True)} | {fmt(r['max_drawdown'], '.1f', True)} |"
             )
+        held = res.get("lockbox_stress_holding_dated") or {}
+        for name, w in held.items():
+            if w.get("covered"):
+                parts = ", ".join(
+                    f"{label(k, t)} {fmt(v['total_return'], '.1f', True)}"
+                    for k, v in w["results"].items()
+                )
+                lines += [
+                    "",
+                    f"2025 stress window `{name}` ({w['start']} to {w['end']}, dated by holding period): {parts}.",
+                ]
     else:
         lines += ["", "Lockbox (2025-01-01 onward): not evaluated yet."]
     lines += [

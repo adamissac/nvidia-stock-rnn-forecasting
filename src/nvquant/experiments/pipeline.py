@@ -920,6 +920,13 @@ def stage_report(cfg: Config) -> Path:
     from nvquant.reporting.tearsheet import render_tearsheet
 
     out = reports_dir(cfg)
+    lock_net = out / "lockbox" / "net.parquet"
+    if lock_net.exists():
+        # The lockbox run (once) dated its stress windows by decision date. Re-dating the same
+        # saved returns to holding periods is a presentation fix; nothing is re-evaluated.
+        net_lb = pd.read_parquet(lock_net)
+        _write_json(out / "lockbox" / "stress_holding_dated.json",
+                    stress_windows(to_holding_dates(net_lb), cfg.evaluation.lockbox_stress_windows))  # fmt: skip
     res = build_results(cfg, out)
     save_results(res, out / "results.json")
     bundle = load_bundle(cfg)
@@ -961,13 +968,6 @@ def stage_report(cfg: Config) -> Path:
         key = f"{peers['models'][0]}{STRATEGY_SEP}{peers['sizing']}"
         fg["peers"] = figs.peer_dots(peers["peers"], key, fdir / "peers.png")
     (out / "tearsheet.html").write_text(render_tearsheet(res, fg), encoding="utf-8")
-    lock_net = out / "lockbox" / "net.parquet"
-    if lock_net.exists():
-        # The lockbox run (once) dated its stress windows by decision date. Re-dating the same
-        # saved returns to holding periods is a presentation fix; nothing is re-evaluated.
-        net_lb = pd.read_parquet(lock_net)
-        _write_json(out / "lockbox" / "stress_holding_dated.json",
-                    stress_windows(to_holding_dates(net_lb), cfg.evaluation.lockbox_stress_windows))  # fmt: skip
     app_dir = out / "app"
     app_dir.mkdir(exist_ok=True)
     store.features[["regime_p_high"]].loc[bundle.net.index[0] :].to_parquet(
