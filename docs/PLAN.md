@@ -174,9 +174,9 @@ Acceptance: the refresh-results check script passes, the app imports and renders
 Acceptance: every finding has a commit that fixes it or a line in docs/RESEARCH_LOG.md that explains why it wasn't fixed.
 
 ### Phase 10: lockbox and ship
-- [ ] docs/PREREGISTRATION.md committed before the lockbox run
-- [ ] `make lockbox` run exactly once; sentinel committed
-- [ ] 2025 stress windows reported from the lockbox run only
+- [x] docs/PREREGISTRATION.md committed before the lockbox run
+- [x] `make lockbox` run exactly once; sentinel committed
+- [x] 2025 stress windows reported from the lockbox run only
 - [ ] `make reproduce` from a fresh clone
 - [ ] results refreshed, PR opened with gh, then merged into main
 

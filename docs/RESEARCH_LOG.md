@@ -139,3 +139,19 @@ The other reviews found real bugs, all fixed:
 For a while the every-fit trial count doubled, because the registry holds both full runs. Distinct configurations are now counted once, so it's back to 421, with a DSR of 0.95 (`meta.n_all_fits`, `headline.best_dsr_all_fits`). The conclusion doesn't change, and the corrected numbers make it stronger.
 
 **Decision.** Preregister the lockbox: the best development configuration (the historical-mean baseline with vol targeting), the best ML configuration (LightGBM with vol targeting), plain ridge with vol targeting, and the five benchmarks.
+
+## 2026-09-22: Phase 10, lockbox
+
+**Hypothesis (preregistered in docs/PREREGISTRATION.md, commit 8f119f6).** No forecast adds value beyond vol targeting. Both learned configurations should land within their bootstrap uncertainty of vol-targeted buy and hold on 2025 onward.
+
+**What ran.** `make lockbox`, once, on the preregistration commit. The feature store was rebuilt on the full history, the three preregistered configurations were refit walk-forward from the first session of 2025, and the five benchmarks were backtested with unchanged costs and timing. The sentinel shows one completed, unforced run (`reports/lockbox/SENTINEL.json`, `n_runs` = 1).
+
+**Result.** 430 sessions, 2025-01-02 to 2026-09-21 (`lockbox`):
+- Vol-targeted buy and hold: net Sharpe 0.82 [-0.56, 2.27].
+- The historical-mean configuration matches it exactly, since it's long every day and sized the same way.
+- LightGBM reaches 0.85 [-0.60, 2.22] and ridge 0.98 [-0.43, 2.49].
+- Both learned configurations are well inside the benchmark's interval, as the preregistration expected, and SMH was the best benchmark (1.46).
+
+After the run I noticed that the stress windows were dated by decision date, which misses moves at a window's first open. The 2025-01-27 DeepSeek gap is earned by the 2025-01-23 decision. I didn't re-run anything. The report re-dates the same saved returns by holding period and shows both tables. Re-dated, the DeepSeek window cost buy and hold 12.3% and the preregistered configurations 11.1% to 14.7%. The April tariff window cost buy and hold 7.9%, while LightGBM gained 6.4% (`lockbox_stress_holding_dated`). The development stress windows use the same holding-period dating now.
+
+**Decision.** The conclusion stands on both the development period and the lockbox: on these features and models, nothing beats holding NVDA with vol targeting after costs. That's the result I report.
