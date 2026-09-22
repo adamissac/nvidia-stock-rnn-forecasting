@@ -125,7 +125,7 @@ $$
 
 **Two engines.** A vectorized engine and an event-driven loop are written separately, and every run checks that they agree to $10^{-10}$. The invariant tests check that a zero signal earns exactly zero, always-long equals buy-and-hold minus one entry cost, higher costs never raise PnL, and a position decided at $t$ earns $r_t$ and nothing else.
 
-**Benchmarks:** buy-and-hold NVDA, vol-targeted buy-and-hold NVDA (the ablation that separates the model from plain vol targeting), SMH, QQQ, a 200-day trend rule, and a random-timing null. Each of its 1,000 paths is a random long/flat direction from a two-state Markov chain, matched to the best strategy's long share and switching rate, multiplied by the vol-targeted buy-and-hold leverage path and charged the full cost model. Beating it means the strategy's timing adds something beyond vol targeting.
+**Benchmarks:** buy-and-hold NVDA, vol-targeted buy-and-hold NVDA (the ablation that separates the model from plain vol targeting), SMH, QQQ, a 200-day trend rule, and a random-timing null. Each of its 1,000 paths is a random long/flat direction from a two-state Markov chain, matched to the best strategy's long share and switching rate, multiplied by the vol-targeted buy-and-hold position-size path and charged the full cost model. Beating it means the strategy's timing adds something beyond vol targeting.
 
 ## 9. Significance
 
@@ -135,7 +135,7 @@ Sharpe ratios in these formulas are per period (daily), $\widehat{SR} = \bar r /
 - **DSR** (Bailey and López de Prado 2014): the PSR with $SR^* = \sqrt{V[\widehat{SR}_n]}\left((1-\gamma)\Phi^{-1}(1-\tfrac1N) + \gamma\,\Phi^{-1}(1-\tfrac{1}{Ne})\right)$, where $N$ is the number of strategy configurations I backtested, $V$ is the variance of their Sharpe ratios, and $\gamma$ is the Euler-Mascheroni constant. I report it twice: with $N$ as the strategy count, and with $N$ as every logged fit.
 - **MinTRL:** $1 + \left(1 - \gamma_3\widehat{SR} + \frac{\gamma_4-1}{4}\widehat{SR}^2\right)\left(\frac{z_{0.95}}{\widehat{SR} - SR^*}\right)^2$ observations.
 - **PBO** via CSCV (Bailey, Borwein, López de Prado, and Zhu 2017): split the $T \times N$ return matrix into 16 blocks, and for each of the $\binom{16}{8}$ ways to choose half of them as in-sample, find where the in-sample best lands out of sample. With relative rank $\omega$, $\lambda = \log\frac{\omega}{1-\omega}$, and $\text{PBO} = \Pr(\lambda \le 0)$.
-- **Hansen's SPA and White's Reality Check** against buy-and-hold and vol-targeted buy-and-hold, with losses $= -$returns and a stationary bootstrap (1,000 reps). Raw returns reward leverage, so I also run SPA with every strategy rescaled to the benchmark's volatility.
+- **Hansen's SPA and White's Reality Check** against buy-and-hold and vol-targeted buy-and-hold, with losses $= -$returns and a stationary bootstrap (1,000 reps). Raw returns reward simply holding a bigger position, so I also run SPA with every strategy rescaled to the benchmark's volatility.
 - **Bootstrap CIs:** stationary bootstrap with the Politis-White optimal block length, 1,000 reps.
 
 ## 10. Risk, attribution, and selection bias
