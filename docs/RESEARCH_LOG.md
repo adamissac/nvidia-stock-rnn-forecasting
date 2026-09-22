@@ -98,3 +98,13 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 - The 2008 stress window has no out-of-sample coverage, because the first out-of-sample date is 2009-07-22.
 
 **Decision.** The development-period conclusion is a null result. No forecast adds value beyond vol targeting after costs, and the method doesn't transfer to the peers. For the lockbox I'll preregister the best configuration, the best ML configuration, and the benchmarks, so 2025 can confirm or contradict this without any new selection.
+
+## 2026-09-22: Phase 8, reporting and docs
+
+**Hypothesis.** If every number in the README and docs is rendered from `reports/results.json`, and a check fails when a block drifts from a fresh render, then no document can quietly disagree with the artifacts.
+
+**What ran.** `make report` builds `reports/results.json`, the static tear sheet, the figures, and the app data. It writes docs/RESULTS.md in full and fills the marked blocks in the README (`RESULTS`, `WHAT_DIDNT_WORK`), V1_POSTMORTEM (`V1`), and INTERVIEW_NOTES (`KEY_NUMBERS`, `RESUME`). `check_readme_block.py` re-renders every block and fails on any difference, and a docs-style test rejects em dashes and the banned hype words. The Streamlit app reads `reports/` only, and a headless AppTest renders it in the integration run.
+
+**Result.** The check passes on the committed artifacts. Writing the v1 block turned up something RMSE hides: the replica's RMSE is dominated by a handful of blown-up forecasts, so the postmortem leads with median absolute error and the share of days worse than persistence (`v1_replica.median_abs_error_model`, `v1_replica.share_days_worse_than_persistence`).
+
+**Decision.** Outside this research log (where every number names its source key), prose in the docs describes methods and doesn't quote result numbers. Those only appear inside generated blocks.
