@@ -121,7 +121,12 @@ def ticker_quality(
         off_calendar_rows=off_cal,
         max_stale_run=_longest_run(live["close"]),
         outliers=len(flagged),
-        outlier_dates=[str(pd.Timestamp(d).date()) for d in flagged.index[:20]],
+        # counts cover every session (a data check), but dates are only listed before the
+        # lockbox so the report doesn't point at specific post-2024 moves
+        outlier_dates=[
+            str(pd.Timestamp(d).date())
+            for d in flagged.index[flagged.index < pd.Timestamp(cfg.lockbox.start)][:20]
+        ],
         suspect_split_dates=_suspect_splits(live) if live["volume"].sum() > 0 else [],
     )
 
