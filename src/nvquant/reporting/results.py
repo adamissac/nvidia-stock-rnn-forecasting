@@ -205,6 +205,7 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
         },
         "cpcv": cpcv,
         "lockbox": lock,
+        "lockbox_stress_holding_dated": _read(reports / "lockbox" / "stress_holding_dated.json"),
         "lockbox_runs": sentinel["n_runs"] if sentinel else 0,
     }
     return out

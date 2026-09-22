@@ -504,27 +504,26 @@ def render_results_md(res: dict[str, Any]) -> str:
                 ],
             )
         )
-        srows = []
-        for name, w in lock["stress"].items():
-            if not w.get("covered"):
-                srows.append([name, f"{w['start']} to {w['end']}", "not covered", "", ""])
-                continue
-            for s, r in w["results"].items():
-                srows.append(
-                    [
-                        name,
-                        f"{w['start']} to {w['end']}",
-                        label(s, t),
-                        fmt(r["total_return"], ".1f", True),
-                        fmt(r["max_drawdown"], ".1f", True),
-                    ]
-                )
-        parts += [
-            "",
-            "2025 stress windows (lockbox run only):",
-            "",
-            _table(["window", "dates", "strategy", "return", "max DD"], srows),
-        ]
+
+        def stress_table(stress: dict[str, Any]) -> str:
+            rows = []
+            for name, w in stress.items():
+                if not w.get("covered"):
+                    rows.append([name, f"{w['start']} to {w['end']}", "not covered", "", ""])
+                    continue
+                for s, r in w["results"].items():
+                    rows.append([name, f"{w['start']} to {w['end']}", label(s, t),
+                                 fmt(r["total_return"], ".1f", True), fmt(r["max_drawdown"], ".1f", True)])  # fmt: skip
+            return _table(["window", "dates", "strategy", "return", "max DD"], rows)
+
+        held = res.get("lockbox_stress_holding_dated")
+        if held:
+            parts += ["", "2025 stress windows (lockbox run only), with each return dated by the session its "
+                      "holding period starts, so a return sits next to the day the move happened:", "", stress_table(held)]  # fmt: skip
+        parts += ["", "The same windows as the lockbox run wrote them, dated by decision date. This table misses "
+                  "the moves that happen at the first open inside a window (the 2025-01-27 gap is earned by the "
+                  "2025-01-23 decision). The table above re-dates the same saved returns; nothing was re-evaluated:",
+                  "", stress_table(lock["stress"])]  # fmt: skip
     return "\n".join(parts) + "\n"
 
 
