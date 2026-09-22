@@ -227,3 +227,4 @@ checkpoints/
 logs/
 reports/fast/
 *.lockbox.tmp
+.claude/

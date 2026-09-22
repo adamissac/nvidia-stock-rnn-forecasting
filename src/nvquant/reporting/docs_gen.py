@@ -536,8 +536,8 @@ def generated_blocks(res: dict[str, Any]) -> dict[str, str]:
     return blocks
 
 
-# Only these files get generated blocks. SPEC.md quotes the marker strings verbatim, so
-# scanning every doc for markers would overwrite the owner's spec.
+# Only these files get generated blocks. Scanning every doc for markers would rewrite any
+# file that merely quotes the marker strings.
 GENERATED_DOCS = ("V1_POSTMORTEM.md", "INTERVIEW_NOTES.md")
 
 

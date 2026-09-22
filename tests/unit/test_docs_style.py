@@ -1,4 +1,4 @@
-"""Writing rules from CLAUDE.md: no em dashes and no hype words in the docs."""
+"""Writing rules from docs/CONVENTIONS.md: no em dashes and no hype words in the docs."""
 
 import re
 from pathlib import Path
@@ -10,7 +10,8 @@ HYPE = re.compile(
     r"\b(cutting-edge|robust|robustly|robustness|leverage[sd]?|leveraging|seamless(ly)?|state-of-the-art|powerful)\b",
     re.I,
 )
-# SPEC.md is the owner's verbatim prompt, and CLAUDE.md quotes the banned list itself.
+# CONVENTIONS.md lists the banned words themselves, so it can't be checked against them.
+SKIP = {"CONVENTIONS.md"}
 DOCS = [
     p
     for p in [
@@ -20,7 +21,7 @@ DOCS = [
         ROOT / "legacy" / "README.md",
         *sorted((ROOT / "docs").rglob("*.md")),
     ]
-    if p.exists() and p.name != "SPEC.md"
+    if p.exists() and p.name not in SKIP
 ]
 
 

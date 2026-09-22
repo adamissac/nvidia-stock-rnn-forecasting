@@ -32,7 +32,7 @@ def test_generated_blocks_never_touch_unlisted_docs(tmp_path):
     from nvquant.reporting.docs_gen import generated_targets
     from nvquant.reporting.readme import END, START
 
-    spec = tmp_path / "SPEC.md"
-    spec.write_text(f"the README block between {START} and {END}\n")
+    quoting_doc = tmp_path / "NOTES.md"
+    quoting_doc.write_text(f"the README block between {START} and {END}\n")
     targets = generated_targets(tmp_path, tmp_path / "README.md")
-    assert spec not in targets
+    assert quoting_doc not in targets

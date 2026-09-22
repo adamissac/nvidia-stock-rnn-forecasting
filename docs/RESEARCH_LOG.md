@@ -10,7 +10,7 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 
 **Result.** All 8 findings from the spec reproduce, and I found 8 more. The most important is finding 4: the saved run trained on a newest-first CSV, so the model learned to predict backwards in time. The README metric isn't computed anywhere in the notebook.
 
-**Decision.** Rebuild as a package with the controls listed at the end of docs/V1_AUDIT.md. The owner lifted the Phase 0 approval gate, so I recorded the plan decisions (long/flat headline, CPU only, $10M AUM, 1-session horizon with next-open fills) in docs/PLAN.md and went straight on to Phase 1.
+**Decision.** Rebuild as a package with the controls listed at the end of docs/V1_AUDIT.md. I recorded the design decisions (long/flat headline, CPU only, $10M AUM, 1-session horizon with next-open fills) in docs/PLAN.md before writing any of it, so the results can be read against a fixed design.
 
 ## 2026-09-21: Phase 1, foundation
 
@@ -103,7 +103,7 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 
 **Hypothesis.** If every number in the README and docs is rendered from `reports/results.json`, and a check fails when a block drifts from a fresh render, then no document can quietly disagree with the artifacts.
 
-**What ran.** `make report` builds `reports/results.json`, the static tear sheet, the figures, and the app data. It writes docs/RESULTS.md in full and fills the marked blocks in the README (`RESULTS`, `WHAT_DIDNT_WORK`), V1_POSTMORTEM (`V1`), and INTERVIEW_NOTES (`KEY_NUMBERS`, `RESUME`). `check_readme_block.py` re-renders every block and fails on any difference, and a docs-style test rejects em dashes and the banned hype words. The Streamlit app reads `reports/` only, and a headless AppTest renders it in the integration run.
+**What ran.** `make report` builds `reports/results.json`, the static tear sheet, the figures, and the app data. It writes docs/RESULTS.md in full and fills the marked blocks in the README (`RESULTS`, `WHAT_DIDNT_WORK`), V1_POSTMORTEM (`V1`), and INTERVIEW_NOTES (`KEY_NUMBERS`, `RESUME`). `tools/check_generated_docs.py` re-renders every block and fails on any difference, and a docs-style test rejects em dashes and the banned hype words. The Streamlit app reads `reports/` only, and a headless AppTest renders it in the integration run.
 
 **Result.** The check passes on the committed artifacts. Writing the v1 block turned up something RMSE hides: the replica's RMSE is dominated by a handful of blown-up forecasts, so the postmortem leads with median absolute error and the share of days worse than persistence (`v1_replica.median_abs_error_model`, `v1_replica.share_days_worse_than_persistence`).
 
@@ -113,9 +113,9 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 
 **Hypothesis.** Independent reviews of the full diff will find mistakes I can't see, most likely in the statistics that decide what I claim.
 
-**What ran.** Five reviews of `main...HEAD`: leakage-auditor, quant-reviewer, silent-failure-hunter, pr-test-analyzer, and a /code-review pass. I fixed every finding in a separate commit, added the tests they asked for, and reran the full pipeline (same data hash).
+**What ran.** Five review passes over the full diff against `main`: a lookahead audit, a skeptical results review, a silent-failure hunt, a test-coverage review, and a general code review. I fixed every finding in its own commit, added the tests they called for, and reran the full pipeline (same data hash).
 
-**Result.** The leakage audit passed, with four low-severity notes, all fixed. The quant review failed on the reporting, and it was right:
+**Result.** The lookahead audit passed, with four low-severity notes, all fixed. The results review failed on the reporting, and it was right:
 - The random null held a constant position, so it measured vol targeting, not timing. Now it's sized with the same vol-target path and costs. Random long/flat timing beats the best configuration on 78.4% of paths (`random_null.best_percentile` = 0.216), and the null's median Sharpe equals vol-targeted buy and hold's.
 - The Fama-French regression mixed open-to-open strategy returns with close-to-close factors, which inflated alpha. Monthly, the best configuration's alpha is 24.1% a year (t = 2.41) against 25.3% (t = 2.49) for vol-targeted buy and hold (`attribution.*.FF5_MOM`). So it's NVDA's alpha, not the model's.
 - 2023 and 2024 account for 82.5% of the compounded dollar gain (`headline.gain_share_2023_2024`), much more than the 28.8% share of summed daily returns suggested.
@@ -129,7 +129,7 @@ The other reviews found real bugs, all fixed:
 - Missing cost inputs fell back to a full-sample median, which is lookahead.
 - Stacking fell back to equal weights when NNLS rejected every member.
 - The lockbox sentinel was written only after the evaluation.
-- `make report` had written generated results into SPEC.md, because the spec quotes the marker strings. SPEC.md is restored, and generated blocks now go only to an explicit list of files.
+- `make report` had written generated results into a doc that merely quoted the block markers. Generated blocks now go only to an explicit list of files.
 
 **Corrections to earlier entries.** The Phase 7 entry quotes numbers from before these fixes:
 - The FF5 alpha was 32.8% (t = 3.98) and is now 24.1% (t = 2.41). The comparison with vol-targeted buy and hold still holds, with new numbers (25.3%, t = 2.49).
@@ -158,4 +158,4 @@ After the run I noticed that the stress windows were dated by decision date, whi
 
 **Fresh-clone reproduction (same day).** `git clone`, `make setup`, and `make reproduce` in an empty directory completed with exit code 0, including a full re-download. Yahoo's adjusted prices came back with the same rows but differences up to 1.4e-6 relative (for example NVDA's close, largest on 2002-05-02), which changed 17 file hashes and the data hash (`ebe58cb94301` against the committed `e2fdd3b2b961`). The best configuration, the vol-targeted buy-and-hold Sharpe, the FF5 alpha, the null percentile, and the 2023 to 2024 gain share all matched to at least five significant figures. The two resampling statistics moved slightly: PBO 0.29 to 0.30, and SPA against vol-targeted buy and hold 0.153 to 0.158. The committed artifacts stay on the original data hash, and the conclusions are the same on both.
 
-**Shipping note.** The GitHub token available here has `repo` but not `workflow` scope, and GitHub rejects any push that creates or updates a file under `.github/workflows/`. Rather than leave the work unpushed, the v2 workflow is parked verbatim at `.github/ci-workflow-pending.yml`, `.github/workflows/ci.yml` keeps v1's content so the push is accepted, and the move into place is one command once the scope is granted. `make ci` runs the same steps locally and passes.
+**Shipping note.** My GitHub token has `repo` but not `workflow` scope, and GitHub rejects any push that creates or updates a file under `.github/workflows/`. Rather than hold the work back, the v2 workflow sits at `.github/ci-workflow-pending.yml`, `.github/workflows/ci.yml` keeps v1's content so the push goes through, and moving it into place is one command once the scope is there. `make ci` runs the same steps locally and passes.

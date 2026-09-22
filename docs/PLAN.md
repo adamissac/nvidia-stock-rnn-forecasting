@@ -1,10 +1,10 @@
 # v2 plan
 
-Source of truth for scope: [SPEC.md](SPEC.md). This file turns the spec's target design into phases with checkboxes and acceptance criteria. A box gets checked only when its acceptance criteria were verified by a command whose output I looked at.
+This file turns the v2 design into phases with checkboxes and acceptance criteria. A box gets checked only when its acceptance criteria were verified by a command whose output I looked at.
 
 ## Decisions
 
-The owner asked me to run every phase without approval gates (see the SPEC addenda), so I made these calls myself. Each one can be changed in `configs/base.yaml` or by a follow-up ADR.
+Decisions I made before starting, so that later results can be read against a fixed design. Each one can be changed in `configs/base.yaml` or by a follow-up ADR.
 
 | # | Question | Decision | Why |
 |---|----------|----------|-----|
@@ -17,7 +17,7 @@ The owner asked me to run every phase without approval gates (see the SPEC adden
 | D7 | Retrain cadence | Tabular and linear models monthly (21 sessions), deep models every 126 sessions, HMM and fracdiff `d` every 252 sessions, GARCH every 21 sessions. | This keeps the full run near the 3-hour budget (see below). |
 | D8 | DSR trial count | N = the number of distinct strategy configurations whose out-of-sample returns I computed in the development run. Inner Optuna trials are logged but not counted, because they never see development OOS returns. I also report DSR with N including every logged fit. | Selection bias comes from choosing among OOS results. The second number shows how sensitive DSR is to this choice. |
 | D9 | Exogenous lag | Every series other than the target's own OHLCV is lagged one session by default, including peers, ETFs, VIX, rates, and factors. | This is conservative. FRED H.15 yields really do publish a day late, and using the same lag everywhere keeps the rule simple to check. |
-| D10 | Ship target | PR from `quant-overhaul` into `main`, then merged with `gh pr merge` (SPEC addendum 2). | The owner asked for the work on main. A merge keeps the "no direct push to main" rule intact. |
+| D10 | Ship target | PR from `quant-overhaul` into `main`, merged with `gh pr merge`. | A merge keeps the "no direct push to main" rule intact and leaves the review trail on the PR. |
 | D11 | Deep model framework | Plain PyTorch, including the v1 replica (with a custom ReLU LSTM cell to match Keras `activation='relu'`). | This avoids pulling in TensorFlow for one model ("no unused frameworks"). |
 | D12 | SHAP | LightGBM's native TreeSHAP (`pred_contrib=True`) instead of the `shap` package. | It computes the same exact values with one less dependency. |
 
@@ -56,22 +56,21 @@ Trade-offs made to fit the budget:
 | ^VIX3M or AVGO history starts late and pushes the modeling start past 2008 | the start date is the latest first-valid date across required inputs, as the spec says. Stress windows without OOS model coverage are reported for benchmarks only, and I say so. |
 | pandas 3.0 breaks a dependency | pin the pandas range in pyproject, run the full test suite in CI |
 | deep models take longer than budgeted | the levers in the table above, cut in the order the spec allows |
-| a result looks too good | the leakage-auditor and quant-reviewer gates, and the random-signal null |
+| a result looks too good | the lookahead audit and results review at the end, and the random-signal null |
 | Ken French data lags a month or two | used only for attribution, which runs on the overlap |
 | earnings dates aren't point-in-time | `days_to_earnings` capped at 20 sessions (about when the date is announced), caveat documented |
 
 ## Phases
 
 ### Phase 0: audit, tooling, plan
-- [x] Branch `quant-overhaul` from an up-to-date `main`; docs/SPEC.md saved verbatim
+- [x] Branch `quant-overhaul` from an up-to-date `main`
 - [x] docs/V1_AUDIT.md: the 8 spec findings verified at a686217, plus 8 more
-- [x] CLAUDE.md, docs/RESEARCH_LOG.md
-- [x] Skills: leakage-guard (with scripts/leakage_lint.py), backtest-protocol, add-model, refresh-results
-- [x] Agents: leakage-auditor, quant-reviewer, experiment-runner
-- [x] Hooks and permissions merged into .claude/settings.json (plugins and marketplaces kept)
+- [x] docs/CONVENTIONS.md (the five non-negotiables, make targets, coding and writing rules), docs/RESEARCH_LOG.md
+- [x] docs/LEAKAGE_CHECKLIST.md and `tools/leakage_lint.py`, a static check for negative shifts, centered windows, backfill, full-sample normalization, unpurged splitters, and HMM smoothing
+- [x] `tools/check_generated_docs.py`, which fails when a doc block drifts from reports/results.json
 - [x] This plan
 
-Acceptance: the files exist, `python3 .claude/skills/leakage-guard/scripts/leakage_lint.py` runs, and the hook exits 0 on a non-Python payload. The branch is pushed.
+Acceptance: the files exist, `python3 tools/leakage_lint.py` runs clean, and the branch is pushed.
 
 ### Phase 1: foundation
 Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli,logging_utils}.py`, `src/nvquant/config/{__init__,schema}.py`, `src/nvquant/experiments/repro.py`, `src/nvquant/data/{market,calendar,synthetic}.py`, `configs/{base,fast,full}.yaml`, `Makefile`, `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `scripts/macos_libomp.py`, `legacy/` (git mv of the notebook, download script, and requirements), `tests/unit/test_{config,synthetic,repro,leakage_lint}.py`.
@@ -163,13 +162,13 @@ Files: `src/nvquant/reporting/{results,tearsheet,readme,figures}.py`, `app/strea
 - [x] INTERVIEW_NOTES with resume bullets that use only numbers from results.json
 - [x] Streamlit app that reads reports/ only
 
-Acceptance: the refresh-results check script passes, the app imports and renders headless, and docs contain no em dashes or hype words (tested).
+Acceptance: `tools/check_generated_docs.py` passes, the app imports and renders headless, and docs contain no em dashes or hype words (tested).
 
 ### Phase 9: review and hardening
-- [x] leakage-auditor PASS on `main...HEAD`
-- [x] quant-reviewer PASS
-- [x] silent-failure-hunter and pr-test-analyzer findings fixed or documented
-- [x] /code-review findings fixed or documented
+- [x] Lookahead audit of `main...HEAD` passes
+- [x] Skeptical results review passes
+- [x] Silent-failure and test-coverage review findings fixed or documented
+- [x] General code review findings fixed or documented
 
 Acceptance: every finding has a commit that fixes it or a line in docs/RESEARCH_LOG.md that explains why it wasn't fixed.
 

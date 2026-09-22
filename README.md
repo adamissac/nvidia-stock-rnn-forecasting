@@ -116,7 +116,7 @@ flowchart LR
 - **Costs.** Spread, commission, vol-scaled slippage, square-root market impact at $10M, and borrow on shorts, plus a 0 to 20 bps sensitivity sweep.
 - **Statistics.** Bootstrap CIs, PSR, the Deflated Sharpe Ratio with the registry's trial count, PBO via CSCV, Hansen's SPA and White's Reality Check, attribution with Newey-West errors, VaR backtests, and the same pipeline run on ten peers to check for selection bias.
 
-The full math is in [docs/METHODOLOGY.md](docs/METHODOLOGY.md), and the design decisions are in [docs/adr/](docs/adr/).
+The full math is in [docs/METHODOLOGY.md](docs/METHODOLOGY.md), the design decisions are in [docs/adr/](docs/adr/), and the rules I work to are in [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## From v1 to v2
 
@@ -148,7 +148,7 @@ The lockbox (2025-01-01 onward) is evaluated exactly once, after [docs/PREREGIST
 
 ## Repo map
 
-`src/nvquant/` (package) · `configs/` (YAML) · `tests/` (unit, property, integration) · `reports/` (generated) · `docs/` · `app/` (Streamlit) · `legacy/` (v1, untouched) · `CLAUDE.md` (project rules)
+`src/nvquant/` (package) · `configs/` (YAML) · `tests/` (unit, property, integration) · `tools/` (leakage lint) · `reports/` (generated) · `docs/` · `app/` (Streamlit) · `legacy/` (v1, untouched)
 
 ## Disclaimer
 

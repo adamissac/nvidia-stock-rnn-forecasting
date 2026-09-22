@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Exit 1 if any generated block in README.md or docs/ differs from what results.json renders to."""
+"""Exit 1 if any generated block in README.md or docs/ differs from what results.json renders to.
+
+Run after `make report`; the block contents must always come from reports/results.json.
+"""
 
 from __future__ import annotations
 

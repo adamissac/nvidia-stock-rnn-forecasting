@@ -13,7 +13,7 @@ make ci             # ruff, leakage lint, mypy, pytest (coverage >= 85%), and th
 
 ## Rules
 
-The rules are in [CLAUDE.md](CLAUDE.md). The short version:
+The rules are in [docs/CONVENTIONS.md](docs/CONVENTIONS.md). The short version:
 
 1. No lookahead. New features go in `nvquant.features.registry`, so the causality property test covers them.
 2. Out-of-sample only: walk-forward or purged CV. Don't touch lockbox dates (2025-01-01 onward).
@@ -23,7 +23,7 @@ The rules are in [CLAUDE.md](CLAUDE.md). The short version:
 
 ## Adding a model
 
-Follow `.claude/skills/add-model/SKILL.md`: implement `Forecaster`, register it in `nvquant.models.factory`, add a config block, add tests (including the planted-signal and pure-noise checks), run `make train backtest evaluate report`, and add a dated entry to docs/RESEARCH_LOG.md.
+Implement `Forecaster` (`fit(X, y, w)` and `predict(X, index)`, with everything fit inside `fit`), register it in `nvquant.models.factory.MODEL_REGISTRY`, add a config block under `models:` in `configs/base.yaml`, add tests (including the planted-signal and pure-noise checks), run `make train backtest evaluate report`, and add a dated entry to docs/RESEARCH_LOG.md.
 
 ## Commits
 
