@@ -108,3 +108,29 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 **Result.** The check passes on the committed artifacts. Writing the v1 block turned up something RMSE hides: the replica's RMSE is dominated by a handful of blown-up forecasts, so the postmortem leads with median absolute error and the share of days worse than persistence (`v1_replica.median_abs_error_model`, `v1_replica.share_days_worse_than_persistence`).
 
 **Decision.** Outside this research log (where every number names its source key), prose in the docs describes methods and doesn't quote result numbers. Those only appear inside generated blocks.
+
+## 2026-09-22: Phase 9, review and hardening
+
+**Hypothesis.** Independent reviews of the full diff will find mistakes I can't see, most likely in the statistics that decide what I claim.
+
+**What ran.** Five reviews of `main...HEAD`: leakage-auditor, quant-reviewer, silent-failure-hunter, pr-test-analyzer, and a /code-review pass. I fixed every finding in a separate commit, added the tests they asked for, and reran the full pipeline (same data hash).
+
+**Result.** The leakage audit passed, with four low-severity notes, all fixed. The quant review failed on the reporting, and it was right:
+- The random null held a constant position, so it measured vol targeting, not timing. Now it's sized with the same vol-target path and costs. Random long/flat timing beats the best configuration on 78.4% of paths (`random_null.best_percentile` = 0.216), and the null's median Sharpe equals vol-targeted buy and hold's.
+- The Fama-French regression mixed open-to-open strategy returns with close-to-close factors, which inflated alpha. Monthly, the best configuration's alpha is 24.1% a year (t = 2.41) against 25.3% (t = 2.49) for vol-targeted buy and hold (`attribution.*.FF5_MOM`). So it's NVDA's alpha, not the model's.
+- 2023 and 2024 account for 82.5% of the compounded dollar gain (`headline.gain_share_2023_2024`), much more than the 28.8% share of summed daily returns suggested.
+- With every strategy rescaled to the benchmark's volatility, SPA against vol-targeted buy and hold gives p = 0.991 (`headline.spa_vs_bh_voltarget_vol_matched`).
+
+The other reviews found real bugs, all fixed:
+- The peer study would crash if meta-labeling won.
+- A NaN Sharpe could win best-strategy selection and turn every DSR into NaN.
+- The GARCH VaR backtest was off by a day, and the rolling VaRs need a two-session lag.
+- The conformal update used an outcome one step early.
+- Missing cost inputs fell back to a full-sample median, which is lookahead.
+- Stacking fell back to equal weights when NNLS rejected every member.
+- The lockbox sentinel was written only after the evaluation.
+- `make report` had written generated results into SPEC.md, because the spec quotes the marker strings. SPEC.md is restored, and generated blocks now go only to an explicit list of files.
+
+**Corrections to earlier entries.** The Phase 7 entry quotes numbers from before these fixes: the FF5 alpha of 32.8% (t = 3.98), the null percentile of 98.0%, and "vol-targeted buy and hold shows about the same alpha". The current values are the ones above. The conclusion doesn't change, and the corrected numbers make it stronger. The every-fit trial count for the conservative DSR doubled because the registry now holds both full runs (`meta.n_all_fits`).
+
+**Decision.** Preregister the lockbox: the best development configuration (the historical-mean baseline with vol targeting), the best ML configuration (LightGBM with vol targeting), plain ridge with vol targeting, and the five benchmarks.
