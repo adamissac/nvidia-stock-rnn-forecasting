@@ -1,0 +1,44 @@
+name: CI
+on:
+  push:
+    branches: [main, quant-overhaul]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install Python 3.12
+        run: uv python install 3.12
+      - name: Sync (CPU torch wheels on Linux)
+        run: uv sync --frozen
+      - name: ruff
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+      - name: leakage lint
+        run: uv run python .claude/skills/leakage-guard/scripts/leakage_lint.py src/nvquant
+      - name: mypy
+        run: uv run mypy
+      - name: pytest (coverage >= 85%, no network)
+        run: uv run pytest
+      - name: end-to-end smoke run on synthetic data
+        run: make smoke
+
+# NOTE: this is the real CI workflow. It sits outside .github/workflows/ because the
+# GitHub token this branch was pushed with lacks the `workflow` scope, and GitHub refuses
+# any push that creates or updates a file under .github/workflows/.
+#
+# To activate it (one command, then push):
+#   gh auth refresh -h github.com -s workflow
+#   git mv .github/ci-workflow-pending.yml .github/workflows/ci.yml && git commit -m "ci: activate the v2 workflow" && git push
+#
+# Until then .github/workflows/ci.yml is v1's workflow, which fails on this repo (it runs
+# `python -m compileall .` over legacy/, whose download script is UTF-16; see docs/V1_AUDIT.md).
+# `make ci` runs exactly what this workflow runs, locally.
