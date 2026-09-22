@@ -88,7 +88,9 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
                                ("evaluation/forecasts.json", fc), ("evaluation/risk.json", risk),
                                ("backtest/strategies.json", bt)) if v is None]  # fmt: skip
     if missing:
-        raise FileNotFoundError(f"cannot build results.json; missing {missing} (run the earlier stages)")
+        raise FileNotFoundError(
+            f"cannot build results.json; missing {missing} (run the earlier stages)"
+        )
     sweep = pd.read_parquet(reports / "backtest" / "cost_sweep.parquet")
     capacity = pd.read_parquet(reports / "backtest" / "capacity.parquet")
     best = strat["best"]
