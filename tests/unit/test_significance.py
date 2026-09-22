@@ -74,3 +74,27 @@ def test_spa_and_bootstrap():
     assert lo < sr < hi and block >= 1
     lo, hi, _ = bootstrap_sharpe_ci(pd.Series(0.0, index=idx), 20, seed=0)
     assert np.isnan(lo) and np.isnan(hi)
+
+
+def test_dsr_hand_example():
+    # N = 10 trials with Sharpe variance 1e-4: SR* is the expected max, and the DSR is the PSR at SR*
+    rng = np.random.default_rng(4)
+    r = rng.normal(0.001, 0.01, 1000)
+    trials = np.array([0.0, 0.01, -0.01, 0.02, -0.02, 0.005, -0.005, 0.015, -0.015, 0.0])
+    res = deflated_sharpe(r, 10, trials)
+    v = float(np.var(trials, ddof=1))
+    assert res.sr_star == pytest.approx(expected_max_sharpe(10, v), rel=1e-12)
+    assert res.dsr == pytest.approx(psr_from_returns(r, sr_star=res.sr_star), rel=1e-12)
+
+
+def test_pbo_is_one_when_the_in_sample_winner_always_loses():
+    # two strategies over four blocks: whichever is better in-sample is worse out of sample
+    block = 250
+    a = np.concatenate([np.full(block, 0.01), np.full(block, -0.01), np.full(block, 0.01), np.full(block, -0.01)])
+    noise = np.random.default_rng(5).normal(0, 1e-4, (4 * block, 2))
+    M = pd.DataFrame(np.column_stack([a, -a]) + noise)
+    res = pbo_cscv(M, 4)
+    assert res.n_combinations == 6
+    assert res.pbo >= 2 / 3  # the two balanced splits are ties at chance; the other four lose
+    flat = M.assign(flat=0.0)
+    assert pbo_cscv(flat, 4).n_combinations == 6  # a constant strategy is dropped, not picked
