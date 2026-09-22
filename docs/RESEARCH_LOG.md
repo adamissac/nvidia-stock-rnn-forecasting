@@ -131,6 +131,11 @@ The other reviews found real bugs, all fixed:
 - The lockbox sentinel was written only after the evaluation.
 - `make report` had written generated results into SPEC.md, because the spec quotes the marker strings. SPEC.md is restored, and generated blocks now go only to an explicit list of files.
 
-**Corrections to earlier entries.** The Phase 7 entry quotes numbers from before these fixes: the FF5 alpha of 32.8% (t = 3.98), the null percentile of 98.0%, and "vol-targeted buy and hold shows about the same alpha". The current values are the ones above. The conclusion doesn't change, and the corrected numbers make it stronger. The every-fit trial count for the conservative DSR doubled because the registry now holds both full runs (`meta.n_all_fits`).
+**Corrections to earlier entries.** The Phase 7 entry quotes numbers from before these fixes:
+- The FF5 alpha was 32.8% (t = 3.98) and is now 24.1% (t = 2.41). The comparison with vol-targeted buy and hold still holds, with new numbers (25.3%, t = 2.49).
+- The null percentile was 98.0% and is now 21.6%, from a null that finally tests timing.
+- The 99% VaR Kupiec p-values moved slightly after the lag fix: Cornish-Fisher 0.214 and GARCH 0.423 (they were 0.215 and 0.422), and historical is 0.044 (`var.0.99.backtests`). The pass and reject calls don't change.
+
+For a while the every-fit trial count doubled, because the registry holds both full runs. Distinct configurations are now counted once, so it's back to 421, with a DSR of 0.95 (`meta.n_all_fits`, `headline.best_dsr_all_fits`). The conclusion doesn't change, and the corrected numbers make it stronger.
 
 **Decision.** Preregister the lockbox: the best development configuration (the historical-mean baseline with vol targeting), the best ML configuration (LightGBM with vol targeting), plain ridge with vol targeting, and the five benchmarks.
