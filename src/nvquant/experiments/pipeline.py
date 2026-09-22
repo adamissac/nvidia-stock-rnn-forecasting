@@ -483,8 +483,6 @@ def evaluate_forecasts(
     cfg: Config, store: FeatureStore, forecasts: dict[str, pd.DataFrame], dates: pd.DatetimeIndex
 ) -> dict[str, object]:
     """Per-model forecast statistics on the common OOS dates, plus the MCS."""
-    import numpy as np
-
     y = store.labels["fwd_ret_1"]
     horizons = {h: store.labels[f"fwd_ret_{h}"] for h in cfg.labels.horizons}
     hist = forecasts.get("hist_mean")

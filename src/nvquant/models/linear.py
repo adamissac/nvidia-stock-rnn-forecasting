@@ -32,7 +32,9 @@ def _inner_cv_score(
             # a large alpha can leave elastic net at max_iter; that candidate just scores worse
             warnings.simplefilter("ignore", ConvergenceWarning)
             m.fit(np.nan_to_num(scaler.transform(rows[tr])), y[tr], sample_weight=w[tr])
-        errs.append(float(np.mean((m.predict(np.nan_to_num(scaler.transform(rows[te]))) - y[te]) ** 2)))
+        errs.append(
+            float(np.mean((m.predict(np.nan_to_num(scaler.transform(rows[te]))) - y[te]) ** 2))
+        )
     return float(np.mean(errs))
 
 

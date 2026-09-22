@@ -90,7 +90,9 @@ def test_dsr_hand_example():
 def test_pbo_is_one_when_the_in_sample_winner_always_loses():
     # two strategies over four blocks: whichever is better in-sample is worse out of sample
     block = 250
-    a = np.concatenate([np.full(block, 0.01), np.full(block, -0.01), np.full(block, 0.01), np.full(block, -0.01)])
+    a = np.concatenate(
+        [np.full(block, 0.01), np.full(block, -0.01), np.full(block, 0.01), np.full(block, -0.01)]
+    )
     noise = np.random.default_rng(5).normal(0, 1e-4, (4 * block, 2))
     M = pd.DataFrame(np.column_stack([a, -a]) + noise)
     res = pbo_cscv(M, 4)

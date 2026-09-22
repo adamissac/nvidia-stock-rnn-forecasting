@@ -121,14 +121,18 @@ def test_cost_rate_matches_formula_and_refuses_missing_inputs(market, setup):
     _, inputs = setup
     live = market.sessions[WARMUP:]
     trade = pd.Series(0.5, index=live)
-    only_impact = CostsConfig(half_spread_bps=0.0, commission_bps=0.0, slippage_vol_mult=0.0, impact_coef=0.1, aum=1e9)
+    only_impact = CostsConfig(
+        half_spread_bps=0.0, commission_bps=0.0, slippage_vol_mult=0.0, impact_coef=0.1, aum=1e9
+    )
     got = cost_rate(trade, inputs, only_impact)
     sig, adv = inputs.sigma.reindex(live), inputs.adv.reindex(live)
     np.testing.assert_allclose(got, 0.1 * sig * np.sqrt(0.5 * 1e9 / adv), rtol=1e-12)
     with pytest.raises(ValueError, match="missing"):
         cost_rate(pd.Series(0.5, index=market.sessions[:5]), inputs, COSTS)
     with pytest.raises(ValueError, match="missing"):
-        run_event(pd.Series(1.0, index=market.sessions[:5]), holding_log_return(market), inputs, COSTS)
+        run_event(
+            pd.Series(1.0, index=market.sessions[:5]), holding_log_return(market), inputs, COSTS
+        )
     # no trade, no cost, even during the warmup
     assert (cost_rate(pd.Series(0.0, index=market.sessions[:5]), inputs, COSTS) >= 0).all()
 

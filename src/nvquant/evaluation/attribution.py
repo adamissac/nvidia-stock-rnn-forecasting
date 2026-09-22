@@ -9,7 +9,9 @@ import statsmodels.api as sm
 from nvquant.evaluation.forecast import newey_west_lags
 
 
-def regress(excess: pd.Series, factors: pd.DataFrame, periods_per_year: int = 252) -> dict[str, object]:
+def regress(
+    excess: pd.Series, factors: pd.DataFrame, periods_per_year: int = 252
+) -> dict[str, object]:
     """OLS of excess returns on factors with HAC (Newey-West) standard errors.
 
     Returns annualized alpha (times ``periods_per_year``), its t-stat, betas with
@@ -61,7 +63,9 @@ def attribution_suite(
     ff_cols = [c for c in ("mkt_rf", "smb", "hml", "rmw", "cma", "mom") if c in ff.columns]
     both = pd.concat([strategy.rename("s"), rf.rename("rf"), ff[ff_cols]], axis=1).dropna()
     m = monthly(both)
-    out["FF5_MOM"] = regress(m["s"] - m["rf"], m[ff_cols], periods_per_year=12) | {"frequency": "monthly"}
+    out["FF5_MOM"] = regress(m["s"] - m["rf"], m[ff_cols], periods_per_year=12) | {
+        "frequency": "monthly"
+    }
     return out
 
 

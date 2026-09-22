@@ -24,9 +24,17 @@ def test_require_committed_refuses_dirty_files(monkeypatch):
 
 
 def test_lockbox_runs_once_then_needs_a_reason(tmp_path):
-    cfg = load_config(ROOT / "configs/fast.yaml", overrides={"paths": {
-        "data_dir": str(tmp_path / "data"), "reports_dir": str(tmp_path / "reports"),
-        "docs_dir": str(tmp_path / "docs"), "readme": str(tmp_path / "README.md")}})
+    cfg = load_config(
+        ROOT / "configs/fast.yaml",
+        overrides={
+            "paths": {
+                "data_dir": str(tmp_path / "data"),
+                "reports_dir": str(tmp_path / "reports"),
+                "docs_dir": str(tmp_path / "docs"),
+                "readme": str(tmp_path / "README.md"),
+            }
+        },
+    )
     pipeline.stage_data(cfg)
     out = pipeline.stage_lockbox(cfg)
     res = json.loads(out.read_text())

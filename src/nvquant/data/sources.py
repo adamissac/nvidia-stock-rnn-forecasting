@@ -48,7 +48,9 @@ def _check_coerced(raw: pd.Series, parsed: pd.Series, what: str, max_share: floa
     """Raise if more than ``max_share`` of the non-blank raw values failed to parse as numbers."""
     bad = int((raw.notna() & parsed.isna()).sum())
     if bad > max_share * max(len(raw), 1):
-        raise ValueError(f"{what}: {bad} of {len(raw)} values aren't numbers; did the format change?")
+        raise ValueError(
+            f"{what}: {bad} of {len(raw)} values aren't numbers; did the format change?"
+        )
 
 
 def normalize_yahoo(frame: pd.DataFrame) -> pd.DataFrame:

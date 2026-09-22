@@ -19,7 +19,10 @@ def store_and_cfg(tmp_path_factory):
 
     root = Path(__file__).resolve().parents[2]
     tmp = tmp_path_factory.mktemp("harness")
-    cfg = load_config(root / "configs/fast.yaml", overrides={"paths": {"data_dir": str(tmp / "data"), "reports_dir": str(tmp / "r")}})
+    cfg = load_config(
+        root / "configs/fast.yaml",
+        overrides={"paths": {"data_dir": str(tmp / "data"), "reports_dir": str(tmp / "r")}},
+    )
     write_synthetic(cfg)
     return build_store(cfg, load_market_data(cfg, "dev")), cfg
 
@@ -52,6 +55,9 @@ def test_fold_metrics_and_first_test_date(store_and_cfg):
     assert res.frame.index[0] == first
     refit = max(pd.Timestamp(v) for v in store.info["fitted_first_refit"].values())
     assert first > refit
-    late = replace(store, info={**store.info, "fitted_first_refit": {"x": str(store.features.index[-200].date())}})
+    late = replace(
+        store,
+        info={**store.info, "fitted_first_refit": {"x": str(store.features.index[-200].date())}},
+    )
     idx = sample_index(late, cfg.labels.target)
     assert first_test_date(late, cfg) == idx[idx > store.features.index[-200]][0]
