@@ -600,7 +600,6 @@ def evaluate_strategies(
     long_share = float((pos > 0).mean())
     switch = float(((pos > 0).astype(int).diff().abs() > 0).mean())
     paths = random_signals(pos.index, switch, long_share, cfg.strategy.random_null_paths, cfg.seed)
-    # random long/flat signals scaled like the best strategy's average gross exposure
     # Random long/flat timing with the best strategy's exposure and switching rate, sized with
     # the same vol-target leverage path and charged the same cost model. Beating this means the
     # *timing* adds something beyond vol targeting.
@@ -881,9 +880,13 @@ def stage_evaluate(cfg: Config) -> Path:
     dates = pd.DatetimeIndex(bundle.net.index)
     _write_json(out / "forecasts.json", evaluate_forecasts(cfg, store, forecasts, dates))
     reg = registry(cfg)
-    rows = [
-        r for r in reg.rows() if r["kind"] in ("model", "strategy", "vol", "tuning", "v1_replica")
-    ]
+    # every distinct configuration ever fit counts once; rerunning the same config on the
+    # same data doesn't add a trial
+    seen: dict[str, dict[str, object]] = {}
+    for r in reg.rows():
+        if r["kind"] in ("model", "strategy", "vol", "tuning", "v1_replica"):
+            seen.setdefault(f"{r['kind']}:{r['name']}:{r['config_hash']}", r)
+    rows = list(seen.values())
     r_hold = holding_log_return(loaded.market, cfg.backtest.execution)
     inputs = inputs_for(loaded.market, store.labels["sigma"], cfg, cfg.universe.target)
     strat = evaluate_strategies(cfg, bundle, rows, r_hold, inputs)
