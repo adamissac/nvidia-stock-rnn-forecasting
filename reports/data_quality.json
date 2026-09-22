@@ -1,0 +1,351 @@
+{
+  "mode": "lockbox",
+  "end": "2026-09-21",
+  "data_hash": "e2fdd3b2b961",
+  "modeling_start": "2006-07-17",
+  "first_valid": {
+    "NVDA": "1999-01-22",
+    "SMH": "2000-06-05",
+    "QQQ": "1999-03-10",
+    "SPY": "1999-01-22",
+    "^VIX": "1999-01-22",
+    "^VIX3M": "2006-07-17",
+    "DGS10": "1999-01-22",
+    "DGS2": "1999-01-22"
+  },
+  "manifest_mismatches": [],
+  "split_checks": [
+    {
+      "ticker": "NVDA",
+      "date": "2021-07-20",
+      "factor": 4.0,
+      "close_ratio": 0.9910672207681327,
+      "open_ratio": 0.9973505844777641,
+      "volume_ratio": 0.5086033301274345,
+      "passed": true
+    },
+    {
+      "ticker": "NVDA",
+      "date": "2024-06-10",
+      "factor": 10.0,
+      "close_ratio": 1.0074614013776346,
+      "open_ratio": 0.995715007301888,
+      "volume_ratio": 0.6879362014284214,
+      "passed": true
+    }
+  ],
+  "split_checks_passed": true,
+  "stale_tickers": [],
+  "tickers": [
+    {
+      "ticker": "NVDA",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 0,
+      "max_stale_run": 3,
+      "outliers": 8,
+      "outlier_dates": [
+        "2000-03-07",
+        "2000-03-14",
+        "2001-01-03",
+        "2002-07-31",
+        "2003-05-09",
+        "2004-08-06",
+        "2008-07-03",
+        "2016-11-11"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "AMD",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 3,
+      "outliers": 4,
+      "outlier_dates": [
+        "2001-07-06",
+        "2002-10-03",
+        "2005-01-11",
+        "2016-04-22"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "AVGO",
+      "first": "2009-08-06",
+      "last": "2026-09-21",
+      "sessions_expected": 4307,
+      "missing_sessions": 0,
+      "off_calendar_rows": 0,
+      "max_stale_run": 2,
+      "outliers": 3,
+      "outlier_dates": [
+        "2020-03-16",
+        "2024-12-13"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "TSM",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 3,
+      "outliers": 3,
+      "outlier_dates": [
+        "2000-10-19",
+        "2002-07-25",
+        "2008-10-28"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "INTC",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 3,
+      "outliers": 11,
+      "outlier_dates": [
+        "2000-09-22",
+        "2001-04-18",
+        "2002-06-07",
+        "2002-10-16",
+        "2020-03-13",
+        "2020-03-16",
+        "2020-07-24",
+        "2024-08-02"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "MU",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 2,
+      "outliers": 0,
+      "outlier_dates": [],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "QCOM",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 2,
+      "outliers": 5,
+      "outlier_dates": [
+        "1999-04-21",
+        "1999-12-29",
+        "2000-01-26",
+        "2000-04-14",
+        "2019-04-16"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "TXN",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 3,
+      "outliers": 3,
+      "outlier_dates": [
+        "2000-10-19",
+        "2002-10-22"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "AMAT",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 4,
+      "outliers": 2,
+      "outlier_dates": [
+        "2001-01-03",
+        "2020-03-16"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "LRCX",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 2,
+      "outliers": 0,
+      "outlier_dates": [],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "ASML",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 2,
+      "outliers": 1,
+      "outlier_dates": [
+        "2002-07-25"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "SMH",
+      "first": "2000-06-05",
+      "last": "2026-09-21",
+      "sessions_expected": 6613,
+      "missing_sessions": 0,
+      "off_calendar_rows": 0,
+      "max_stale_run": 3,
+      "outliers": 0,
+      "outlier_dates": [],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "SOXX",
+      "first": "2001-07-13",
+      "last": "2026-09-21",
+      "sessions_expected": 6334,
+      "missing_sessions": 0,
+      "off_calendar_rows": 0,
+      "max_stale_run": 2,
+      "outliers": 2,
+      "outlier_dates": [
+        "2020-03-16"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "QQQ",
+      "first": "1999-03-10",
+      "last": "2026-09-21",
+      "sessions_expected": 6926,
+      "missing_sessions": 0,
+      "off_calendar_rows": 0,
+      "max_stale_run": 3,
+      "outliers": 5,
+      "outlier_dates": [
+        "2000-01-07",
+        "2001-01-03",
+        "2008-10-13",
+        "2020-03-16"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "SPY",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 2,
+      "outliers": 11,
+      "outlier_dates": [
+        "2008-09-29",
+        "2008-10-13",
+        "2008-10-15",
+        "2008-10-28",
+        "2008-12-01",
+        "2020-03-09",
+        "2020-03-12",
+        "2020-03-13",
+        "2020-03-16",
+        "2020-03-24"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "^SOX",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 13,
+      "max_stale_run": 2,
+      "outliers": 0,
+      "outlier_dates": [],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "^VIX",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 0,
+      "off_calendar_rows": 15,
+      "max_stale_run": 3,
+      "outliers": 2,
+      "outlier_dates": [
+        "2018-02-05",
+        "2024-12-18"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "^VIX3M",
+      "first": "2006-07-17",
+      "last": "2026-09-21",
+      "sessions_expected": 5077,
+      "missing_sessions": 0,
+      "off_calendar_rows": 0,
+      "max_stale_run": 3,
+      "outliers": 4,
+      "outlier_dates": [
+        "2007-02-27",
+        "2018-02-05",
+        "2020-03-16",
+        "2024-08-05"
+      ],
+      "suspect_split_dates": []
+    },
+    {
+      "ticker": "^TNX",
+      "first": "1999-01-22",
+      "last": "2026-09-21",
+      "sessions_expected": 6958,
+      "missing_sessions": 8,
+      "off_calendar_rows": 13,
+      "max_stale_run": 3,
+      "outliers": 11,
+      "outlier_dates": [
+        "2009-03-18",
+        "2020-03-06",
+        "2020-03-09",
+        "2020-03-10",
+        "2020-03-16",
+        "2020-03-17",
+        "2020-03-18",
+        "2020-03-20",
+        "2020-03-23",
+        "2020-04-15",
+        "2020-11-09"
+      ],
+      "suspect_split_dates": []
+    }
+  ]
+}

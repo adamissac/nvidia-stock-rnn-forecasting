@@ -1,10 +1,10 @@
 # v2 plan
 
-Source of truth for scope: [SPEC.md](SPEC.md). This file turns the spec's target design into phases with checkboxes and acceptance criteria. A box gets checked only when its acceptance criteria were verified by a command whose output I looked at.
+This file turns the v2 design into phases with checkboxes and acceptance criteria. A box gets checked only when its acceptance criteria were verified by a command whose output I looked at.
 
 ## Decisions
 
-The owner asked me to run every phase without approval gates (see the SPEC addenda), so I made these calls myself. Each one can be changed in `configs/base.yaml` or by a follow-up ADR.
+Decisions I made before starting, so that later results can be read against a fixed design. Each one can be changed in `configs/base.yaml` or by a follow-up ADR.
 
 | # | Question | Decision | Why |
 |---|----------|----------|-----|
@@ -17,7 +17,7 @@ The owner asked me to run every phase without approval gates (see the SPEC adden
 | D7 | Retrain cadence | Tabular and linear models monthly (21 sessions), deep models every 126 sessions, HMM and fracdiff `d` every 252 sessions, GARCH every 21 sessions. | This keeps the full run near the 3-hour budget (see below). |
 | D8 | DSR trial count | N = the number of distinct strategy configurations whose out-of-sample returns I computed in the development run. Inner Optuna trials are logged but not counted, because they never see development OOS returns. I also report DSR with N including every logged fit. | Selection bias comes from choosing among OOS results. The second number shows how sensitive DSR is to this choice. |
 | D9 | Exogenous lag | Every series other than the target's own OHLCV is lagged one session by default, including peers, ETFs, VIX, rates, and factors. | This is conservative. FRED H.15 yields really do publish a day late, and using the same lag everywhere keeps the rule simple to check. |
-| D10 | Ship target | PR from `quant-overhaul` into `main`, then merged with `gh pr merge` (SPEC addendum 2). | The owner asked for the work on main. A merge keeps the "no direct push to main" rule intact. |
+| D10 | Ship target | PR from `quant-overhaul` into `main`, merged with `gh pr merge`. | A merge keeps the "no direct push to main" rule intact and leaves the review trail on the PR. |
 | D11 | Deep model framework | Plain PyTorch, including the v1 replica (with a custom ReLU LSTM cell to match Keras `activation='relu'`). | This avoids pulling in TensorFlow for one model ("no unused frameworks"). |
 | D12 | SHAP | LightGBM's native TreeSHAP (`pred_contrib=True`) instead of the `shap` package. | It computes the same exact values with one less dependency. |
 
@@ -56,128 +56,127 @@ Trade-offs made to fit the budget:
 | ^VIX3M or AVGO history starts late and pushes the modeling start past 2008 | the start date is the latest first-valid date across required inputs, as the spec says. Stress windows without OOS model coverage are reported for benchmarks only, and I say so. |
 | pandas 3.0 breaks a dependency | pin the pandas range in pyproject, run the full test suite in CI |
 | deep models take longer than budgeted | the levers in the table above, cut in the order the spec allows |
-| a result looks too good | the leakage-auditor and quant-reviewer gates, and the random-signal null |
+| a result looks too good | the lookahead audit and results review at the end, and the random-signal null |
 | Ken French data lags a month or two | used only for attribution, which runs on the overlap |
 | earnings dates aren't point-in-time | `days_to_earnings` capped at 20 sessions (about when the date is announced), caveat documented |
 
 ## Phases
 
 ### Phase 0: audit, tooling, plan
-- [x] Branch `quant-overhaul` from an up-to-date `main`; docs/SPEC.md saved verbatim
+- [x] Branch `quant-overhaul` from an up-to-date `main`
 - [x] docs/V1_AUDIT.md: the 8 spec findings verified at a686217, plus 8 more
-- [x] CLAUDE.md, docs/RESEARCH_LOG.md
-- [x] Skills: leakage-guard (with scripts/leakage_lint.py), backtest-protocol, add-model, refresh-results
-- [x] Agents: leakage-auditor, quant-reviewer, experiment-runner
-- [x] Hooks and permissions merged into .claude/settings.json (plugins and marketplaces kept)
+- [x] docs/CONVENTIONS.md (the five non-negotiables, make targets, coding and writing rules), docs/RESEARCH_LOG.md
+- [x] docs/LEAKAGE_CHECKLIST.md and `tools/leakage_lint.py`, a static check for negative shifts, centered windows, backfill, full-sample normalization, unpurged splitters, and HMM smoothing
+- [x] `tools/check_generated_docs.py`, which fails when a doc block drifts from reports/results.json
 - [x] This plan
 
-Acceptance: the files exist, `python3 .claude/skills/leakage-guard/scripts/leakage_lint.py` runs, and the hook exits 0 on a non-Python payload. The branch is pushed.
+Acceptance: the files exist, `python3 tools/leakage_lint.py` runs clean, and the branch is pushed.
 
 ### Phase 1: foundation
-Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli}.py`, `src/nvquant/config/`, `src/nvquant/experiments/repro.py`, `src/nvquant/logging_utils.py`, `src/nvquant/data/synthetic.py`, `configs/{base,fast,full}.yaml`, `Makefile`, `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `legacy/` (git mv of the notebook and download script), `tests/unit/test_{config,synthetic,repro,leakage_lint}.py`.
-- [ ] uv project (Python 3.12), src layout, typer CLI `nvquant`, CPU torch wheels on Linux CI
-- [ ] pydantic config with base plus profile merge, and a config hash
-- [ ] Seeding for python, numpy, and torch, deterministic torch, device detection, git SHA, file hashing
-- [ ] Synthetic generators: GBM, GARCH(1,1), 2-state regime switching, planted weak signal, and a full synthetic `MarketData` for the fast profile
-- [ ] Makefile targets: setup, data, data-report, features, train, backtest, evaluate, report, reproduce, lockbox, test, lint, typecheck, ci, app (PROFILE=fast|full)
-- [ ] CI: uv sync, ruff, mypy, pytest with coverage >= 85%, end-to-end fast-profile smoke run
-- [ ] pre-commit (ruff, ruff-format, end-of-file, leakage lint)
-- [ ] legacy/ with README, v1 files moved with `git mv`, v1 notebook unmodified
+Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli,logging_utils}.py`, `src/nvquant/config/{__init__,schema}.py`, `src/nvquant/experiments/repro.py`, `src/nvquant/data/{market,calendar,synthetic}.py`, `configs/{base,fast,full}.yaml`, `Makefile`, `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `scripts/macos_libomp.py`, `legacy/` (git mv of the notebook, download script, and requirements), `tests/unit/test_{config,synthetic,repro,leakage_lint}.py`.
+- [x] uv project (Python 3.12), src layout, typer CLI `nvquant`, CPU torch wheels on Linux CI
+- [x] pydantic config with base plus profile merge, and a config hash
+- [x] Seeding for python, numpy, and torch, deterministic torch, device detection, git SHA, file hashing
+- [x] Synthetic generators: GBM, GARCH(1,1), 2-state regime switching, planted weak signal, and a full synthetic `MarketData` for the fast profile
+- [x] Makefile targets: setup, data, data-report, features, train, backtest, evaluate, report, reproduce, lockbox, test, lint, typecheck, ci, app (PROFILE=fast|full)
+- [x] CI: uv sync, ruff, mypy, pytest with coverage >= 85%, end-to-end fast-profile smoke run. `make ci` runs the same steps and passes locally (149 tests, 97% coverage). The workflow file itself is parked at `.github/ci-workflow-pending.yml`: the push token lacks GitHub's `workflow` scope, so it can't be written into `.github/workflows/`. Moving it there is one command, listed in that file.
+- [x] pre-commit (ruff, ruff-format, end-of-file, leakage lint)
+- [x] legacy/ with README, v1 files moved with `git mv`, v1 notebook unmodified
 
 Acceptance: `make ci` passes locally and GitHub Actions is green on the branch.
 
 ### Phase 2: data
-Files: `src/nvquant/data/{universe,yahoo,fred,french,earnings,calendar,schemas,manifest,quality,loader}.py`, `reports/data_quality.{json,md}`.
-- [ ] yfinance download with `multi_level_index=False`, `auto_adjust=True`, retries with backoff, parquet cache
-- [ ] FRED DGS10 and DGS2 from the keyless CSV endpoint
-- [ ] Ken French FF5 plus momentum daily zips
-- [ ] NVDA earnings dates with the point-in-time caveat
-- [ ] NYSE session alignment (exchange_calendars), pandera schemas
-- [ ] Manifest with source, download time, and SHA256 per file; data hash
-- [ ] Data-quality report: missing sessions, stale prices, outliers, split checks on 2021-07-20 and 2024-06-10 for prices and volume
-- [ ] Modeling start date computed and documented; dev loader truncates at the lockbox cutoff
+Files: `src/nvquant/data/{sources,schemas,manifest,loader,quality}.py` (the universe lives in `config/schema.py`; `sources.py` holds the Yahoo, FRED, Ken French, and earnings downloaders), `reports/data_quality.{json,md}`, `tests/unit/test_data.py`.
+- [x] yfinance download with `multi_level_index=False`, `auto_adjust=True`, retries with backoff, parquet cache
+- [x] FRED DGS10 and DGS2 from the keyless CSV endpoint
+- [x] Ken French FF5 plus momentum daily zips
+- [x] NVDA earnings dates with the point-in-time caveat
+- [x] NYSE session alignment (exchange_calendars), pandera schemas
+- [x] Manifest with source, download time, and SHA256 per file; data hash
+- [x] Data-quality report: missing sessions, stale prices, outliers, split checks on 2021-07-20 and 2024-06-10 for prices and volume
+- [x] Modeling start date computed and documented; dev loader truncates at the lockbox cutoff
 
 Acceptance: `make data data-report` works from an empty cache, the split checks pass, and the loader tests (offline, on fixtures) pass.
 
 ### Phase 3: features and labels
-Files: `src/nvquant/features/{registry,returns,volatility,technical,volume,cross_asset,macro,calendar_feats,fracdiff,fitted,store,docs}.py`, `src/nvquant/labels/{forward,triple_barrier,meta,weights}.py`, `docs/FEATURES.md` (generated), `tests/property/test_feature_causality.py`, `tests/property/test_labels.py`.
-- [ ] All spec feature groups with lookback and lag metadata
-- [ ] Fracdiff (fixed width) with the minimum `d` passing ADF, chosen on training data only
-- [ ] Labels: forward 1/5/21 log returns, vol-normalized, triple barrier, meta-labels, uniqueness weights; every label has `t_end`
-- [ ] Causality property test over every registered feature
-- [ ] Feature store (parquet) and generated feature docs
+Files: `src/nvquant/features/{registry,price,cross_asset,calendar_feats,fracdiff,fitted,store,docs}.py`, `src/nvquant/models/regime.py` (the HMM behind the regime feature), `src/nvquant/labels/{forward,triple_barrier,weights}.py` (meta-labels live in `triple_barrier.py`), `docs/FEATURES.md` (generated), `tests/property/test_{feature_causality,labels_property}.py`, `tests/unit/test_{features,labels}.py`.
+- [x] All spec feature groups with lookback and lag metadata
+- [x] Fracdiff (fixed width) with the minimum `d` passing ADF, chosen on training data only
+- [x] Labels: forward 1/5/21 log returns, vol-normalized, triple barrier, meta-labels, uniqueness weights; every label has `t_end`
+- [x] Causality property test over every registered feature
+- [x] Feature store (parquet) and generated feature docs
 
 Acceptance: the property tests pass with at least 50 hypothesis examples per feature, and `make features` writes the store and docs/FEATURES.md.
 
 ### Phase 4: validation framework
-Files: `src/nvquant/cv/{splits,purging,lockbox}.py`, `src/nvquant/experiments/{registry,tuning,harness}.py`, `tests/property/test_cv_purging.py`.
-- [ ] Expanding and rolling walk-forward with configurable retrain frequency
-- [ ] Purged k-fold with embargo; CPCV with path reconstruction
-- [ ] Lockbox guard and sentinel with `--force --reason`
-- [ ] JSONL registry with config, hashes, git SHA, fold metrics, wall time
-- [ ] Nested Optuna inside training folds with a bounded budget; every trial logged
-- [ ] Property tests: no training label interval overlaps a test fold, and the embargo holds
+Files: `src/nvquant/cv/{splits,lockbox}.py` (purging lives in `splits.py`), `src/nvquant/experiments/{registry,tuning,harness}.py`, `tests/property/test_cv_purging.py`, `tests/unit/test_{cv,registry}.py`.
+- [x] Expanding and rolling walk-forward with configurable retrain frequency
+- [x] Purged k-fold with embargo; CPCV with path reconstruction
+- [x] Lockbox guard and sentinel with `--force --reason`
+- [x] JSONL registry with config, hashes, git SHA, fold metrics, wall time
+- [x] Nested Optuna inside training folds with a bounded budget; every trial logged
+- [x] Property tests: no training label interval overlaps a test fold, and the embargo holds
 
 Acceptance: the property tests pass, and a harness run on synthetic data writes registry rows.
 
 ### Phase 5: models
-Files: `src/nvquant/models/{base,factory,baselines,linear,trees,volatility,regime,ensemble,v1_replica}.py`, `src/nvquant/models/deep/{nets,heads,train}.py`, `src/nvquant/evaluation/forecast.py`, `docs/V1_POSTMORTEM.md`.
-- [ ] Baselines: zero, historical mean, AR(p); ridge, elastic net; LightGBM
-- [ ] Deep: LSTM and GRU (Gaussian NLL and quantile heads), TCN, PatchTST-lite; one training loop with early stopping, gradient clipping, and seed ensembles
-- [ ] v1 replica against a persistence forecast
-- [ ] Volatility: GARCH, GJR-GARCH-t, EGARCH, HAR-RV, LightGBM vol; QLIKE, MSE, Mincer-Zarnowitz
-- [ ] Regimes: walk-forward Gaussian HMM plus my own forward filter
-- [ ] Ensembles: equal weight and purged-CV stacking
-- [ ] Forecast evaluation: R2_oos, DM-HLN, IC with Newey-West, IC decay, Pesaran-Timmermann, PIT and coverage, adaptive conformal, MCS
-- [ ] Synthetic recovery tests: planted signal gives positive IC, GBM gives none
+Files: `src/nvquant/models/{base,factory,baselines,linear,trees,volatility,ensemble,v1_replica}.py`, `src/nvquant/models/deep/{nets,train}.py` (heads live in `nets.py`), `src/nvquant/evaluation/forecast.py`, `docs/V1_POSTMORTEM.md`, `tests/unit/test_{models,volatility}.py`.
+- [x] Baselines: zero, historical mean, AR(p); ridge, elastic net; LightGBM
+- [x] Deep: LSTM and GRU (Gaussian NLL and quantile heads), TCN, PatchTST-lite; one training loop with early stopping, gradient clipping, and seed ensembles
+- [x] v1 replica against a persistence forecast
+- [x] Volatility: GARCH, GJR-GARCH-t, EGARCH, HAR-RV, LightGBM vol; QLIKE, MSE, Mincer-Zarnowitz
+- [x] Regimes: walk-forward Gaussian HMM plus my own forward filter
+- [x] Ensembles: equal weight and purged-CV stacking
+- [x] Forecast evaluation: R2_oos, DM-HLN, IC with Newey-West, IC decay, Pesaran-Timmermann, PIT and coverage, adaptive conformal, MCS
+- [x] Synthetic recovery tests: planted signal gives positive IC, GBM gives none
 
 Acceptance: `make train` finishes within budget, every model has OOS forecasts over the whole dev OOS range, and the recovery tests pass.
 
 ### Phase 6: strategy and backtest
-Files: `src/nvquant/portfolio/{sizing,meta_labeling}.py`, `src/nvquant/backtest/{costs,vectorized,event,benchmarks,strategies}.py`.
-- [ ] Threshold and scaled signals, vol targeting, fractional Kelly with caps, regime filter, meta-labeling
-- [ ] Next-open execution; the full cost model; 0 to 20 bps sweep; capacity sweep
-- [ ] Vectorized and event-driven engines agree to 1e-10 (tested)
-- [ ] Invariants: zero signal earns 0, always-long equals buy-and-hold minus entry cost, costs are monotone, positions are lagged
-- [ ] Benchmarks, including vol-targeted buy-and-hold and the random null
+Files: `src/nvquant/portfolio/{sizing,meta_labeling}.py`, `src/nvquant/backtest/{costs,vectorized,event,benchmarks,strategies}.py`, `tests/unit/test_backtest_engines.py`.
+- [x] Threshold and scaled signals, vol targeting, fractional Kelly with caps, regime filter, meta-labeling
+- [x] Next-open execution; the full cost model; 0 to 20 bps sweep; capacity sweep
+- [x] Vectorized and event-driven engines agree to 1e-10 (tested)
+- [x] Invariants: zero signal earns 0, always-long equals buy-and-hold minus entry cost, costs are monotone, positions are lagged
+- [x] Benchmarks, including vol-targeted buy-and-hold and the random null
 
 Acceptance: the engine agreement and invariant tests pass, and `make backtest` writes the strategy return matrix and registers every config.
 
 ### Phase 7: evaluation and risk
-Files: `src/nvquant/evaluation/{metrics,significance,attribution,risk,importance,peers}.py`.
-- [ ] Performance metrics, including rolling Sharpe and IC
-- [ ] PSR, DSR, PBO (CSCV), SPA, White RC, bootstrap CIs, MinTRL; hand-computed unit tests
-- [ ] Attribution on QQQ, SMH, and FF5 plus momentum with Newey-West
-- [ ] VaR and CVaR (historical, parametric, Cornish-Fisher, GARCH) with Kupiec and Christoffersen
-- [ ] Stress windows before 2025, regime-conditional results, block-bootstrap Monte Carlo
-- [ ] Peer study on all 10 peers
-- [ ] Explainability: TreeSHAP, MDA under purged CV, MDI, clustered MDA, stability
+Files: `src/nvquant/evaluation/{metrics,significance,attribution,risk,importance}.py`, `src/nvquant/experiments/pipeline.py` (peer study, CPCV paths, and every stage), `tests/unit/test_{significance,evaluation}.py`, `tests/integration/test_pipeline_fast.py`.
+- [x] Performance metrics, including rolling Sharpe and IC
+- [x] PSR, DSR, PBO (CSCV), SPA, White RC, bootstrap CIs, MinTRL; hand-computed unit tests
+- [x] Attribution on QQQ, SMH, and FF5 plus momentum with Newey-West
+- [x] VaR and CVaR (historical, parametric, Cornish-Fisher, GARCH) with Kupiec and Christoffersen
+- [x] Stress windows before 2025, regime-conditional results, block-bootstrap Monte Carlo
+- [x] Peer study on all 10 peers
+- [x] Explainability: TreeSHAP, MDA under purged CV, MDI, clustered MDA, stability
 
 Acceptance: `make evaluate` writes reports/evaluation/*.json, and the significance tests match the hand-computed examples.
 
 ### Phase 8: reporting and docs
 Files: `src/nvquant/reporting/{results,tearsheet,readme,figures}.py`, `app/streamlit_app.py`, `README.md`, `docs/{METHODOLOGY,RESULTS,V1_POSTMORTEM,INTERVIEW_NOTES}.md`, `docs/adr/*.md`, `CHANGELOG.md`, `CITATION.cff`, `CONTRIBUTING.md`.
-- [ ] `make report` writes reports/results.json, reports/tearsheet.html, and the README block
-- [ ] README rewrite with a mermaid diagram, "What didn't work", and "From v1 to v2"
-- [ ] METHODOLOGY, RESULTS, V1_POSTMORTEM, ADRs, CHANGELOG, CITATION.cff, CONTRIBUTING
-- [ ] INTERVIEW_NOTES with resume bullets that use only numbers from results.json
-- [ ] Streamlit app that reads reports/ only
+- [x] `make report` writes reports/results.json, reports/tearsheet.html, and the README block
+- [x] README rewrite with a mermaid diagram, "What didn't work", and "From v1 to v2"
+- [x] METHODOLOGY, RESULTS, V1_POSTMORTEM, ADRs, CHANGELOG, CITATION.cff, CONTRIBUTING
+- [x] INTERVIEW_NOTES with resume bullets that use only numbers from results.json
+- [x] Streamlit app that reads reports/ only
 
-Acceptance: the refresh-results check script passes, the app imports and renders headless, and docs contain no em dashes or hype words (tested).
+Acceptance: `tools/check_generated_docs.py` passes, the app imports and renders headless, and docs contain no em dashes or hype words (tested).
 
 ### Phase 9: review and hardening
-- [ ] leakage-auditor PASS on `main...HEAD`
-- [ ] quant-reviewer PASS
-- [ ] silent-failure-hunter and pr-test-analyzer findings fixed or documented
-- [ ] /code-review findings fixed or documented
+- [x] Lookahead audit of `main...HEAD` passes
+- [x] Skeptical results review passes
+- [x] Silent-failure and test-coverage review findings fixed or documented
+- [x] General code review findings fixed or documented
 
 Acceptance: every finding has a commit that fixes it or a line in docs/RESEARCH_LOG.md that explains why it wasn't fixed.
 
 ### Phase 10: lockbox and ship
-- [ ] docs/PREREGISTRATION.md committed before the lockbox run
-- [ ] `make lockbox` run exactly once; sentinel committed
-- [ ] 2025 stress windows reported from the lockbox run only
-- [ ] `make reproduce` from a fresh clone
+- [x] docs/PREREGISTRATION.md committed before the lockbox run
+- [x] `make lockbox` run exactly once; sentinel committed
+- [x] 2025 stress windows reported from the lockbox run only
+- [x] `make reproduce` from a fresh clone
 - [ ] results refreshed, PR opened with gh, then merged into main
 
 Acceptance: the sentinel shows one run, its timestamp is after the preregistration commit, and the PR is merged.

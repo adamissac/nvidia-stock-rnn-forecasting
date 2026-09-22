@@ -1,0 +1,95 @@
+# Base config. Profiles (fast.yaml, full.yaml) extend this file.
+# Every number that can change a result is set here; see src/nvquant/config/schema.py.
+seed: 42
+device: cpu
+n_jobs: 8
+
+lockbox:
+  start: 2025-01-01
+
+cv:
+  scheme: expanding
+  initial_train: 756      # 3 years of sessions before the first OOS forecast
+  retrain_every: 21       # monthly refits for tabular models
+  embargo: 5
+  kfold_splits: 5
+  cpcv_groups: 6
+  cpcv_test_groups: 2
+
+labels:
+  horizons: [1, 5, 21]
+  target: fwd_ret_vn_1    # models learn the vol-normalized 1-session return
+  vol_span: 63
+  triple_barrier: {upper_mult: 1.0, lower_mult: 1.0, vertical: 10, vol_span: 50}
+
+models:
+  zero:        {kind: zero}
+  hist_mean:   {kind: hist_mean}
+  ar:          {kind: ar, params: {max_lag: 5}}
+  ridge:       {kind: ridge, params: {alphas: [1.0, 10.0, 100.0, 1000.0, 10000.0]}}
+  elastic_net: {kind: elastic_net, params: {l1_ratio: 0.5, alphas: [0.001, 0.01, 0.1]}}
+  lgbm:
+    kind: lgbm
+    tune: true
+    params: {n_estimators: 300, learning_rate: 0.02, num_leaves: 7, min_child_samples: 100,
+             subsample: 0.7, subsample_freq: 1, colsample_bytree: 0.7, reg_lambda: 10.0}
+  lstm_gauss:
+    kind: rnn
+    retrain_every: 126
+    params: {cell: lstm, head: gaussian, hidden: 16, seq_len: 20, seeds: 3, max_epochs: 40}
+  lstm_quant:
+    kind: rnn
+    retrain_every: 126
+    params: {cell: lstm, head: quantile, hidden: 16, seq_len: 20, seeds: 3, max_epochs: 40}
+  gru_gauss:
+    kind: rnn
+    retrain_every: 126
+    params: {cell: gru, head: gaussian, hidden: 16, seq_len: 20, seeds: 3, max_epochs: 40}
+  gru_quant:
+    kind: rnn
+    retrain_every: 126
+    params: {cell: gru, head: quantile, hidden: 16, seq_len: 20, seeds: 3, max_epochs: 40}
+  tcn:
+    kind: tcn
+    retrain_every: 126
+    params: {channels: 16, levels: 3, kernel: 3, seq_len: 32, seeds: 3, max_epochs: 40}
+  patchtst:
+    kind: patchtst
+    retrain_every: 126
+    params: {d_model: 16, n_heads: 2, n_layers: 1, patch_len: 8, stride: 4, seq_len: 40,
+             seeds: 3, max_epochs: 40}
+
+tuning:
+  n_trials: 20
+  inner_splits: 3
+  retune_every: 252
+  timeout_seconds: 120
+
+vol:
+  models: [ewma, garch, gjr_t, egarch, har, lgbm_vol]
+  refit_every: 21
+  min_train: 756
+  sizing_model: gjr_t
+
+regime:
+  n_states: 2
+  refit_every: 252
+  min_train: 756
+  n_iter: 200
+
+strategy:
+  target_vol: 0.35
+  max_gross: 1.5
+  scale_window: 252
+  trend_window: 200
+  meta_primary: trend_200
+  random_null_paths: 1000
+
+costs:
+  half_spread_bps: 1.0
+  commission_bps: 0.5
+  slippage_vol_mult: 0.02   # slippage = 0.02 x daily vol (about 6 bps at 3% daily vol)
+  impact_coef: 0.1          # square-root impact coefficient
+  aum: 10000000
+  adv_window: 20
+  borrow_bps_annual: 30

@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "nvquant: out-of-sample research on forecasting and trading daily NVDA returns"
+authors:
+  - family-names: Issac
+    given-names: Adam
+version: 2.0.0
+date-released: 2026-09-22
+license: MIT
+repository-code: "https://github.com/adamissac/nvidia-stock-rnn-forecasting"
+keywords:
+  - quantitative finance
+  - walk-forward validation
+  - deflated sharpe ratio
+  - backtest overfitting
+  - time series

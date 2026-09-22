@@ -1,0 +1,137 @@
+{
+  "metrics": {
+    "n": 3887.0,
+    "rmse_model": 1905562026.3777893,
+    "rmse_persistence": 0.986551195493896,
+    "rmse_model_scaled": 138876513.86594814,
+    "rmse_persistence_scaled": 0.05767087944167635,
+    "rmse_ratio": 1931538915.6503022,
+    "direction_accuracy": 0.4913815281708258,
+    "share_days_up": 0.5294571649086699,
+    "implied_return_ic": -0.008837057086584384,
+    "dm_stat": 3.971435293684858,
+    "dm_pvalue": 7.273440353598041e-05,
+    "share_test_above_train_max": 0.49035245690764084,
+    "median_abs_error_model": 0.7539684588240902,
+    "median_abs_error_persistence": 0.022773479196476876,
+    "share_days_worse_than_persistence": 0.9217905839979419,
+    "share_days_blown_up": 0.10625160792384873,
+    "max_abs_prediction": 35829870592.0,
+    "max_open": 148.95033233522298,
+    "n_parameters": 282101
+  },
+  "fits": [
+    {
+      "refit_date": "2009-07-22",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.002433114917948842,
+      "train_min": 0.13720408327528552,
+      "train_max": 0.573513067258935
+    },
+    {
+      "refit_date": "2010-07-22",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.0227187592536211,
+      "train_min": 0.19185706346930095,
+      "train_max": 0.42944889714636053
+    },
+    {
+      "refit_date": "2011-07-21",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.02072967030107975,
+      "train_min": 0.19940331214739937,
+      "train_max": 0.5858615294089808
+    },
+    {
+      "refit_date": "2012-07-20",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.03706710785627365,
+      "train_min": 0.26343186489212894,
+      "train_max": 0.4669514249252327
+    },
+    {
+      "refit_date": "2013-07-24",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.0614708848297596,
+      "train_min": 0.2644410169440224,
+      "train_max": 0.3486400711489463
+    },
+    {
+      "refit_date": "2014-07-24",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.00509050115942955,
+      "train_min": 0.31098613175498774,
+      "train_max": 0.46800938026602457
+    },
+    {
+      "refit_date": "2015-07-24",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.1625947803258896,
+      "train_min": 0.40357235248663637,
+      "train_max": 0.5625602977839773
+    },
+    {
+      "refit_date": "2016-07-25",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.03921055793762207,
+      "train_min": 0.46473340401276786,
+      "train_max": 1.346824429717986
+    },
+    {
+      "refit_date": "2017-07-25",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.11513420194387436,
+      "train_min": 0.8526519952147377,
+      "train_max": 4.1468555472670205
+    },
+    {
+      "refit_date": "2018-07-25",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.03879858925938606,
+      "train_min": 2.5338596042461474,
+      "train_max": 6.544409598715337
+    },
+    {
+      "refit_date": "2019-07-26",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.011515936814248562,
+      "train_min": 3.128618945125404,
+      "train_max": 7.148923674569364
+    },
+    {
+      "refit_date": "2020-07-27",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.003661566646769643,
+      "train_min": 3.3689195829006886,
+      "train_max": 10.534360613748039
+    },
+    {
+      "refit_date": "2021-07-27",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.016394048929214478,
+      "train_min": 6.9786235872010405,
+      "train_max": 20.758392448778196
+    },
+    {
+      "refit_date": "2022-07-27",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.059684451669454575,
+      "train_min": 13.501530662163134,
+      "train_max": 33.37002012110695
+    },
+    {
+      "refit_date": "2023-07-28",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.005026138387620449,
+      "train_min": 10.931645390841727,
+      "train_max": 47.31876592185892
+    },
+    {
+      "refit_date": "2024-07-30",
+      "n_train": 252,
+      "final_train_mse_scaled": 0.005595403723418713,
+      "train_min": 27.563538380203276,
+      "train_max": 139.41396587386305
+    }
+  ]
+}

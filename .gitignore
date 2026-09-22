@@ -218,7 +218,13 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Local datasets
-data/
+/data/
 *.h5
 checkpoints/
 
+
+# nvquant
+logs/
+reports/fast/
+*.lockbox.tmp
+.claude/

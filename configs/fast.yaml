@@ -1,0 +1,45 @@
+# Fast profile: synthetic data, tiny models, used by CI (target: under 5 minutes).
+extends: base.yaml
+profile: fast
+n_jobs: 2
+paths:
+  data_dir: data/fast
+  reports_dir: reports/fast
+  docs_dir: reports/fast/docs
+  readme: reports/fast/README_preview.md
+data:
+  source: synthetic
+  synthetic: {n_sessions: 1100, start: 2019-01-02, signal_strength: 0.3}
+lockbox:
+  start: 2023-01-03
+cv:
+  initial_train: 300
+  retrain_every: 63
+  rolling_window: 400
+features:
+  fracdiff: {max_width: 100, refit_every: 500, min_train: 300}
+labels:
+  triple_barrier: {vertical: 5}
+models:
+  lgbm: {params: {n_estimators: 60}}
+  lstm_gauss: {retrain_every: 252, params: {hidden: 4, seq_len: 10, seeds: 1, max_epochs: 3}}
+  lstm_quant: {enabled: false}
+  gru_gauss: {enabled: false}
+  gru_quant: {retrain_every: 252, params: {hidden: 4, seq_len: 10, seeds: 1, max_epochs: 3}}
+  tcn: {retrain_every: 252, params: {channels: 4, levels: 2, seq_len: 12, seeds: 1, max_epochs: 3}}
+  patchtst: {retrain_every: 252, params: {d_model: 8, seq_len: 16, seeds: 1, max_epochs: 3}}
+tuning: {n_trials: 3, inner_splits: 2, retune_every: 500, timeout_seconds: 20}
+vol: {refit_every: 126, min_train: 300}
+regime: {refit_every: 500, min_train: 300, n_iter: 50}
+strategy: {scale_window: 100, random_null_paths: 50}
+evaluation:
+  n_bootstrap: 50
+  spa_reps: 50
+  pbo_blocks: 8
+  mc_paths: 50
+  mda_repeats: 1
+  var_window: 100
+  peer_models: [ridge]
+  cpcv_models: [ridge]
+v1: {epochs: 2, train_len: 120, refit_every: 400}
+ensemble: {members: [ridge, elastic_net, lgbm, lstm_gauss, gru_quant, tcn, patchtst], stack_min_history: 100}

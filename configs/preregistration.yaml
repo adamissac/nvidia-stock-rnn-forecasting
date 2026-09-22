@@ -1,0 +1,11 @@
+# Lockbox plan, fixed before the lockbox is opened. See docs/PREREGISTRATION.md.
+strategies:
+  - hist_mean__voltarget   # best development configuration (a naive baseline)
+  - lgbm__voltarget        # best configuration built on a machine-learning forecast
+  - ridge__voltarget       # the plainest learned model with the same sizing
+benchmarks:
+  - bh_target
+  - bh_voltarget
+  - bh_smh
+  - bh_qqq
+  - trend_200

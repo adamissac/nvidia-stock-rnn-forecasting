@@ -1,0 +1,5 @@
+# Full profile: real data, the whole pipeline (about 3 hours on a CPU laptop).
+extends: base.yaml
+profile: full
+data:
+  source: yahoo

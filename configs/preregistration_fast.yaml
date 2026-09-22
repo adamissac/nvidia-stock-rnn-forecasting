@@ -1,0 +1,3 @@
+# Lockbox plan for the fast (synthetic) profile, used only by the CI smoke test.
+strategies: [ridge__voltarget, lgbm__voltarget]
+benchmarks: [bh_target, bh_voltarget]
