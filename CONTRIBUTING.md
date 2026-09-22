@@ -7,6 +7,8 @@ make setup          # uv sync, the macOS libomp fix for LightGBM, pre-commit hoo
 make ci             # ruff, leakage lint, mypy, pytest (coverage >= 85%), and the fast end-to-end run
 ```
 
+`make ci` is what CI runs. The workflow file is currently parked at `.github/ci-workflow-pending.yml` (see the note inside it) because the token used to push this work lacks GitHub's `workflow` scope.
+
 `make setup` needs [uv](https://docs.astral.sh/uv/). On macOS without Homebrew's `libomp`, `scripts/macos_libomp.py` points LightGBM at the OpenMP runtime that PyTorch ships.
 
 ## Rules

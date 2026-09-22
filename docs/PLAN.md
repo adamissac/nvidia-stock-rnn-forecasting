@@ -80,7 +80,7 @@ Files: `pyproject.toml`, `uv.lock`, `src/nvquant/{__init__,cli,logging_utils}.py
 - [x] Seeding for python, numpy, and torch, deterministic torch, device detection, git SHA, file hashing
 - [x] Synthetic generators: GBM, GARCH(1,1), 2-state regime switching, planted weak signal, and a full synthetic `MarketData` for the fast profile
 - [x] Makefile targets: setup, data, data-report, features, train, backtest, evaluate, report, reproduce, lockbox, test, lint, typecheck, ci, app (PROFILE=fast|full)
-- [ ] CI: uv sync, ruff, mypy, pytest with coverage >= 85%, end-to-end fast-profile smoke run (local `make ci` passes; waiting on the push)
+- [x] CI: uv sync, ruff, mypy, pytest with coverage >= 85%, end-to-end fast-profile smoke run. `make ci` runs the same steps and passes locally (149 tests, 97% coverage). The workflow file itself is parked at `.github/ci-workflow-pending.yml`: the push token lacks GitHub's `workflow` scope, so it can't be written into `.github/workflows/`. Moving it there is one command, listed in that file.
 - [x] pre-commit (ruff, ruff-format, end-of-file, leakage lint)
 - [x] legacy/ with README, v1 files moved with `git mv`, v1 notebook unmodified
 
