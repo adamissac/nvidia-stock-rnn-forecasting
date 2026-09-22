@@ -1,0 +1,21 @@
+import pytest
+
+from nvquant.reporting.readme import END, START, extract_block, fmt, inject, label
+
+
+def test_fmt_and_label():
+    assert fmt(None) == "n/a" and fmt(float("nan")) == "n/a"
+    assert fmt(0.1234, ".1f", pct=True) == "12.3%"
+    assert label("bh_target", "NVDA") == "Buy and hold NVDA"
+    assert label("ridge__voltarget", "NVDA") == "`ridge` + voltarget"
+
+
+def test_inject_and_extract(tmp_path):
+    p = tmp_path / "README.md"
+    p.write_text(f"# t\n\n{START}\nold\n{END}\n\nafter\n")
+    inject(p, "new | table")
+    text = p.read_text()
+    assert extract_block(text) == "new | table" and text.endswith("after\n")
+    p.write_text("no markers")
+    with pytest.raises(ValueError):
+        inject(p, "x")
