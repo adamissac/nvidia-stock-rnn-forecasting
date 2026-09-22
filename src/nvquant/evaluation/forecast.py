@@ -201,8 +201,9 @@ def adaptive_conformal(
 
     At each t the interval is ``pred_t +/- Q_{1 - alpha_t}`` of the last
     ``window`` absolute residuals that are already known. Because the label at t
-    resolves two sessions later, only residuals up to t-2 are used. After the
-    outcome, ``alpha_{t+1} = alpha_t + gamma (alpha - err_t)``.
+    resolves two sessions later, only residuals up to t-2 are used, and the
+    update ``alpha <- alpha + gamma (alpha - err_s)`` for the interval at s is
+    applied at s+2, when its outcome is known.
     """
     y, pred = np.asarray(y, float), np.asarray(pred, float)
     n = len(y)
@@ -210,7 +211,11 @@ def adaptive_conformal(
     a_t = alpha
     errs = []
     resid = np.abs(y - pred)
+    pending: dict[int, float] = {}
     for t in range(n):
+        # the outcome of interval t-2 resolves at the open of t, before the decision at t
+        if t - 2 in pending:
+            a_t = a_t + gamma * (alpha - pending.pop(t - 2))
         past = resid[max(0, t - 1 - window) : max(0, t - 1)]
         past = past[~np.isnan(past)]
         if len(past) >= 30:
@@ -219,7 +224,7 @@ def adaptive_conformal(
             if not np.isnan(y[t]):
                 err = float(not (lo[t] <= y[t] <= hi[t]))
                 errs.append(err)
-                a_t = a_t + gamma * (alpha - err)
+                pending[t] = err
     width = hi - lo
     return ConformalResult(
         lo, hi, float(1 - np.mean(errs)) if errs else float("nan"), float(np.nanmean(width))
