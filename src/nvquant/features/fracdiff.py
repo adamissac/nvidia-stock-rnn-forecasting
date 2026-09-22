@@ -11,7 +11,12 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from statsmodels.tools.sm_exceptions import InterpolationWarning
 from statsmodels.tsa.stattools import adfuller
+
+from nvquant.logging_utils import get_logger
+
+log = get_logger(__name__)
 
 
 def ffd_weights(d: float, threshold: float = 1e-4, max_width: int = 252) -> np.ndarray:
@@ -64,8 +69,9 @@ def min_d_passing_adf(
             continue
         with warnings.catch_warnings():
             # statsmodels warns when the p-value is outside its lookup table (it clips to 0.001/0.1)
-            warnings.simplefilter("ignore")
+            warnings.simplefilter("ignore", InterpolationWarning)
             pvals[d] = float(adfuller(fd.to_numpy(), maxlag=1, regression="c", autolag=None)[1])
         if pvals[d] < pvalue:
             return d, pvals
+    log.warning("no d in %s passed ADF at %.2f; using d=%s", grid, pvalue, max(grid))
     return max(grid), pvals
