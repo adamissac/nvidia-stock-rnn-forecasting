@@ -162,6 +162,8 @@ def build_results(cfg: Config, reports: Path) -> dict[str, Any]:
             "random_null_percentile": strat["random_null"]["best_percentile"],
             "alpha_ff5_ann": attribution[best]["FF5_MOM"].get("alpha_ann"),
             "alpha_ff5_t": attribution[best]["FF5_MOM"].get("alpha_t"),
+            "alpha_ff5_voltarget_ann": attribution["bh_voltarget"]["FF5_MOM"].get("alpha_ann"),
+            "alpha_ff5_voltarget_t": attribution["bh_voltarget"]["FF5_MOM"].get("alpha_t"),
             "alpha_smh_ann": attribution[best].get("SMH", {}).get("alpha_ann"),
             "alpha_smh_t": attribution[best].get("SMH", {}).get("alpha_t"),
             "pnl_share_2023_2024": risk["pnl_share_2023_2024"],

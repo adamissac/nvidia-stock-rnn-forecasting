@@ -74,7 +74,9 @@ def render_results_block(res: dict[str, Any]) -> str:
         f"scaled to the benchmark's volatility; against buy and hold: {fmt(h['spa_vs_bh_target'])}.",
         f"- Random long/flat timing with the same exposure and switching rate, sized with the same vol target and costs, "
         f"beats it {fmt(1 - h['random_null_percentile'], '.1f', True)} of the time.",
-        f"- Fama-French 5 + momentum alpha: {fmt(h['alpha_ff5_ann'], '.1f', True)} a year (t = {fmt(h['alpha_ff5_t'])}). "
+        f"- Fama-French 5 + momentum alpha (monthly): {fmt(h['alpha_ff5_ann'], '.1f', True)} a year (t = {fmt(h['alpha_ff5_t'])}), "
+        f"against {fmt(h['alpha_ff5_voltarget_ann'], '.1f', True)} (t = {fmt(h['alpha_ff5_voltarget_t'])}) for vol-targeted buy and hold, "
+        "so the alpha is NVDA's, not the model's. "
         f"2023 and 2024 account for {fmt(h['gain_share_2023_2024'], '.0f', True)} of its compounded dollar gain "
         f"({fmt(h['pnl_share_2023_2024'], '.0f', True)} of its summed daily returns).",
         "",
