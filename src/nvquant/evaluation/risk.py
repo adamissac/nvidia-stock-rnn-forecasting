@@ -135,11 +135,28 @@ def var_suite(
     return out
 
 
+def to_holding_dates(returns: pd.DataFrame) -> pd.DataFrame:
+    """Re-date returns from decision date t to the session the holding period starts (t+1).
+
+    A position decided at the close of t earns open(t+1) to open(t+2), so a market
+    event on day d shows up in the return stamped d-1 (or d-2 for an overnight gap
+    into d). Labeling by holding start puts each return next to the day it happened.
+    """
+    from nvquant.data.calendar import nyse_sessions
+
+    idx = pd.DatetimeIndex(returns.index)
+    cal = nyse_sessions(idx.min(), idx.max() + pd.Timedelta(days=10))
+    out = returns.copy()
+    out.index = cal[cal.get_indexer(idx) + 1]
+    return out
+
+
 def stress_windows(
     returns: pd.DataFrame, windows: dict[str, tuple[object, object]]
 ) -> dict[str, dict[str, object]]:
     """Total return and max drawdown of each column inside each named window.
 
+    ``returns`` should be dated by holding period (see :func:`to_holding_dates`).
     Windows with no out-of-sample coverage are reported as uncovered, not skipped.
     """
     out: dict[str, dict[str, object]] = {}

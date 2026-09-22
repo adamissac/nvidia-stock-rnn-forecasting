@@ -173,3 +173,15 @@ def test_importance():
     )
     assert mda.mean().idxmax() in {"a", "e"} and mdi.shape[0] == 3
     assert -1 <= stability(mda) <= 1
+
+
+def test_to_holding_dates_moves_each_return_to_the_next_session():
+    from nvquant.evaluation.risk import to_holding_dates
+
+    idx = pd.DatetimeIndex(["2025-01-23", "2025-01-24", "2025-01-27"])
+    out = to_holding_dates(pd.DataFrame({"a": [1.0, 2.0, 3.0]}, index=idx))
+    assert list(out.index) == [
+        pd.Timestamp("2025-01-24"),
+        pd.Timestamp("2025-01-27"),
+        pd.Timestamp("2025-01-28"),
+    ]

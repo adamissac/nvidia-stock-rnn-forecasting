@@ -45,6 +45,7 @@ from nvquant.evaluation.risk import (
     bootstrap_equity_paths,
     regime_conditional,
     stress_windows,
+    to_holding_dates,
     var_suite,
 )
 from nvquant.evaluation.significance import (
@@ -669,7 +670,7 @@ def evaluate_risk(
         ]
         if c in net
     ]
-    stress = stress_windows(net[stress_cols], cfg.evaluation.stress_windows)
+    stress = stress_windows(to_holding_dates(net[stress_cols]), cfg.evaluation.stress_windows)
     regimes = {n: regime_conditional(net[n], store.features["regime_p_high"]) for n in focus}
     years = {n: calendar_year_returns(net[n]).to_dict() for n in focus}
     pnl = net[best]
@@ -960,6 +961,13 @@ def stage_report(cfg: Config) -> Path:
         key = f"{peers['models'][0]}{STRATEGY_SEP}{peers['sizing']}"
         fg["peers"] = figs.peer_dots(peers["peers"], key, fdir / "peers.png")
     (out / "tearsheet.html").write_text(render_tearsheet(res, fg), encoding="utf-8")
+    lock_net = out / "lockbox" / "net.parquet"
+    if lock_net.exists():
+        # The lockbox run (once) dated its stress windows by decision date. Re-dating the same
+        # saved returns to holding periods is a presentation fix; nothing is re-evaluated.
+        net_lb = pd.read_parquet(lock_net)
+        _write_json(out / "lockbox" / "stress_holding_dated.json",
+                    stress_windows(to_holding_dates(net_lb), cfg.evaluation.lockbox_stress_windows))  # fmt: skip
     app_dir = out / "app"
     app_dir.mkdir(exist_ok=True)
     store.features[["regime_p_high"]].loc[bundle.net.index[0] :].to_parquet(
@@ -1067,7 +1075,9 @@ def stage_lockbox(cfg: Config, force: bool = False, reason: str | None = None) -
         m.update({"sharpe_ci_lo": lo, "sharpe_ci_hi": hi, "psr_0": psr_from_returns(r.to_numpy()),
                   "kind": bundle.specs[n].kind})  # fmt: skip
         rows[n] = m
-    stress = stress_windows(bundle.net[names], cfg.evaluation.lockbox_stress_windows)
+    stress = stress_windows(
+        to_holding_dates(bundle.net[names]), cfg.evaluation.lockbox_stress_windows
+    )
     ldir = out / "lockbox"
     ldir.mkdir(parents=True, exist_ok=True)
     for key, frame in (("net", bundle.net), ("positions", bundle.positions)):
