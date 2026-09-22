@@ -552,7 +552,11 @@ def evaluate_forecasts(
 
 
 def evaluate_strategies(
-    cfg: Config, bundle: BacktestBundle, reg_rows: list[dict[str, object]]
+    cfg: Config,
+    bundle: BacktestBundle,
+    reg_rows: list[dict[str, object]],
+    r_hold: pd.Series,
+    inputs: CostInputs,
 ) -> dict[str, object]:
     """Metrics, bootstrap CIs, PSR/DSR/MinTRL, PBO, SPA/RC, and the random-signal null."""
     import numpy as np
@@ -590,17 +594,14 @@ def evaluate_strategies(
     switch = float(((pos > 0).astype(int).diff().abs() > 0).mean())
     paths = random_signals(pos.index, switch, long_share, cfg.strategy.random_null_paths, cfg.seed)
     # random long/flat signals scaled like the best strategy's average gross exposure
-    scale = float(pos[pos > 0].mean()) if (pos > 0).any() else 1.0
-    r_hold = bundle.gross["bh_target"]  # position 1, so gross is the target's simple holding return
-    cost = float(
-        bundle.net[best].sub(bundle.gross[best]).abs().sum()
-        / max(bundle.turnover[best].sum(), 1e-12)
-    )
+    # Random long/flat timing with the best strategy's exposure and switching rate, sized with
+    # the same vol-target leverage path and charged the same cost model. Beating this means the
+    # *timing* adds something beyond vol targeting.
+    lev = bundle.positions["bh_voltarget"].reindex(pos.index).fillna(0.0)
     null_srs = []
     for p in paths:
-        pp = pd.Series(p * scale, index=pos.index)
-        trade = pp.diff().abs().fillna(pp.abs())
-        null_srs.append(sharpe(pp * r_hold.reindex(pos.index) - cost * trade))
+        pp = pd.Series(p, index=pos.index) * lev
+        null_srs.append(sharpe(run_vectorized(pp, r_hold, inputs, cfg.costs).net))
     null = np.asarray(null_srs)
     return {
         "strategies": rows,
@@ -613,7 +614,7 @@ def evaluate_strategies(
         "spa": spa,
         "random_null": {"n_paths": len(null), "sharpe_p50": float(np.nanmedian(null)), "sharpe_p95": float(np.nanquantile(null, 0.95)),
                         "best_percentile": float(np.nanmean(null < float(rows[best]["sharpe"]))), "long_share": long_share, "switch_rate": switch,
-                        "cost_per_unit_turnover": cost},
+                        "sizing": "random long/flat direction times the vol-targeted buy-and-hold leverage path, full cost model"},
     }  # fmt: skip
 
 
@@ -863,7 +864,9 @@ def stage_evaluate(cfg: Config) -> Path:
     rows = [
         r for r in reg.rows() if r["kind"] in ("model", "strategy", "vol", "tuning", "v1_replica")
     ]
-    strat = evaluate_strategies(cfg, bundle, rows)
+    r_hold = holding_log_return(loaded.market, cfg.backtest.execution)
+    inputs = inputs_for(loaded.market, store.labels["sigma"], cfg, cfg.universe.target)
+    strat = evaluate_strategies(cfg, bundle, rows, r_hold, inputs)
     _write_json(out / "strategies.json", strat)
     best = str(strat["best"])
     _write_json(out / "risk.json", evaluate_risk(cfg, loaded.market, store, bundle, vol, best))
