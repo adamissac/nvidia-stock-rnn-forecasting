@@ -287,28 +287,28 @@
       "n": 59,
       "results": {
         "hist_mean__voltarget": {
-          "total_return": -0.40893793655761723,
+          "total_return": -0.4024669644313764,
           "max_drawdown": -0.419714789346996
         },
         "bh_target": {
-          "total_return": -0.5451134296152301,
-          "max_drawdown": -0.5623650373755227
+          "total_return": -0.5457876266061816,
+          "max_drawdown": -0.5623650373755226
         },
         "bh_voltarget": {
-          "total_return": -0.40893793655761723,
+          "total_return": -0.4024669644313764,
           "max_drawdown": -0.419714789346996
         },
         "bh_smh": {
-          "total_return": -0.19351914409077398,
-          "max_drawdown": -0.22354182289535918
+          "total_return": -0.2191781199370645,
+          "max_drawdown": -0.2235418228953593
         },
         "bh_qqq": {
-          "total_return": -0.18928988623468535,
-          "max_drawdown": -0.2199911758332732
+          "total_return": -0.2214102345942811,
+          "max_drawdown": -0.21999117583327366
         },
         "trend_200": {
-          "total_return": -0.18255277081322974,
-          "max_drawdown": -0.18557593366348457
+          "total_return": -0.1707870057841917,
+          "max_drawdown": -0.18557593366348446
         }
       }
     },
@@ -319,28 +319,28 @@
       "n": 24,
       "results": {
         "hist_mean__voltarget": {
-          "total_return": -0.19180225835209597,
-          "max_drawdown": -0.2284871595864436
+          "total_return": -0.18564221278862436,
+          "max_drawdown": -0.249631779261137
         },
         "bh_target": {
-          "total_return": -0.18805569302561698,
-          "max_drawdown": -0.3417941418029009
+          "total_return": -0.23998463666607284,
+          "max_drawdown": -0.3598501060080017
         },
         "bh_voltarget": {
-          "total_return": -0.19180225835209597,
-          "max_drawdown": -0.2284871595864436
+          "total_return": -0.18564221278862436,
+          "max_drawdown": -0.249631779261137
         },
         "bh_smh": {
-          "total_return": -0.22994731339042584,
-          "max_drawdown": -0.3262797898606504
+          "total_return": -0.26031584140243735,
+          "max_drawdown": -0.3384564994255431
         },
         "bh_qqq": {
-          "total_return": -0.2184174524590251,
-          "max_drawdown": -0.2667940729221886
+          "total_return": -0.23646560941818684,
+          "max_drawdown": -0.2756313734677861
         },
         "trend_200": {
-          "total_return": -0.1873895415378699,
-          "max_drawdown": -0.34017889685910996
+          "total_return": -0.23936108975448467,
+          "max_drawdown": -0.3582791706134564
         }
       }
     },
@@ -351,28 +351,28 @@
       "n": 198,
       "results": {
         "hist_mean__voltarget": {
-          "total_return": -0.3788183223864735,
-          "max_drawdown": -0.3995979806368464
+          "total_return": -0.3946676159118695,
+          "max_drawdown": -0.4163118927448395
         },
         "bh_target": {
-          "total_return": -0.5920209280960531,
-          "max_drawdown": -0.6207657854670645
+          "total_return": -0.6134220485974107,
+          "max_drawdown": -0.6373996619800559
         },
         "bh_voltarget": {
-          "total_return": -0.3788183223864735,
-          "max_drawdown": -0.3995979806368464
+          "total_return": -0.3946676159118695,
+          "max_drawdown": -0.4163118927448395
         },
         "bh_smh": {
-          "total_return": -0.4243848564343783,
-          "max_drawdown": -0.4591667265065892
+          "total_return": -0.4292000473734886,
+          "max_drawdown": -0.4676971912722234
         },
         "bh_qqq": {
-          "total_return": -0.30911231358552493,
-          "max_drawdown": -0.35039127308897755
+          "total_return": -0.32799275784592075,
+          "max_drawdown": -0.3625035882719605
         },
         "trend_200": {
-          "total_return": -0.3757273759806794,
-          "max_drawdown": -0.34708958210800134
+          "total_return": -0.3660539462965833,
+          "max_drawdown": -0.3757273759806792
         }
       }
     }
