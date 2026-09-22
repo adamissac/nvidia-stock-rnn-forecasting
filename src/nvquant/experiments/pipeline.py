@@ -240,12 +240,14 @@ def _train_vol(
     vdir.mkdir(exist_ok=True)
     start = pd.Timestamp(store.info["modeling_start"])
     vf = all_vol_forecasts(loaded.market, store.features, start, cfg.vol, cfg.seed)
+    failures = vf.attrs.get("convergence_failures", {})
     vf.to_parquet(vdir / "vol_forecasts.parquet")
     first = first_test_date(store, cfg)
     oos = vf.loc[first:]
     scores = {}
     for m in cfg.vol.models:
         scores[m] = asdict(score_vol(oos["rv_next"], oos[m]))
+        scores[m]["convergence_failures"] = len(failures.get(m, []))
         reg.log(
             Trial(kind="vol", name=m, run_id=rid, git_sha=sha, data_hash=loaded.data_hash,
                   config={"vol": cfg.vol.model_dump(mode="json"), "model": m}, metrics=scores[m])

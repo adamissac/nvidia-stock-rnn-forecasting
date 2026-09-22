@@ -22,7 +22,10 @@ import statsmodels.api as sm
 from nvquant.config.schema import VolConfig
 from nvquant.data.market import MarketData
 from nvquant.evaluation.forecast import newey_west_lags
+from nvquant.logging_utils import get_logger
 from nvquant.models.trees import LGBMForecaster
+
+log = get_logger(__name__)
 
 GARCH_SPECS: dict[str, dict[str, object]] = {
     "garch": {"vol": "GARCH", "p": 1, "o": 0, "q": 1, "dist": "normal"},
@@ -61,18 +64,27 @@ def garch_forecasts(
 
     r = _returns_pct(market).loc[start:]
     out = []
+    failed: list[str] = []
     for i, d in enumerate(refit_dates):
         nxt = refit_dates[i + 1] if i + 1 < len(refit_dates) else r.index[-1]
         am = arch_model(r.loc[:nxt], mean="Constant", **spec)  # type: ignore[arg-type]
         last = r.index[r.index.get_loc(d) + 1] if d < r.index[-1] else None
-        # arch resets its ConvergenceWarning filter inside fit(), so record instead of ignore
+        # arch resets its ConvergenceWarning filter inside fit(), so record the warnings and
+        # check the optimizer's own flag instead of letting them print or disappear
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
             res = am.fit(last_obs=last, disp="off", options={"maxiter": 1000})
+        if res.convergence_flag != 0:
+            failed.append(str(d.date()))
         fc = res.forecast(horizon=1, start=d, reindex=False).variance["h.1"]
         lo = d if i == 0 else d + pd.Timedelta(days=1)
         out.append(fc.loc[lo:nxt])
-    return (pd.concat(out) / 1e4).rename("var")
+    if failed:
+        log.warning("%s: optimizer did not converge at %d of %d refits (%s)", spec["vol"],
+                    len(failed), len(refit_dates), ", ".join(failed[:5]))  # fmt: skip
+    series = (pd.concat(out) / 1e4).rename("var")
+    series.attrs["convergence_failures"] = failed
+    return series
 
 
 def har_forecasts(rv: pd.Series, refit_dates: pd.DatetimeIndex, start: pd.Timestamp) -> pd.Series:
@@ -156,6 +168,9 @@ def all_vol_forecasts(
         else:
             raise KeyError(f"unknown vol model {name}")
     out = pd.DataFrame(cols)
+    out.attrs["convergence_failures"] = {
+        k: v.attrs.get("convergence_failures", []) for k, v in cols.items()
+    }
     out["rv_next"] = rv.shift(-1).reindex(out.index)  # leakage-ok: realized target for scoring only
     return out
 
