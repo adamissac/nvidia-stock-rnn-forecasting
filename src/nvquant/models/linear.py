@@ -18,20 +18,21 @@ from nvquant.models.base import Forecaster, tabular_rows
 def _inner_cv_score(
     make: type[Ridge] | type[ElasticNet],
     kwargs: dict[str, float],
-    Xs: np.ndarray,
+    rows: np.ndarray,
     y: np.ndarray,
     w: np.ndarray,
     folds: list[tuple[np.ndarray, np.ndarray]],
 ) -> float:
-    """Mean squared error across purged inner folds."""
+    """Mean squared error across purged inner folds, scaling on each fold's training rows."""
     errs = []
     for tr, te in folds:
+        scaler = StandardScaler().fit(rows[tr])
         m = make(**kwargs)
         with warnings.catch_warnings():
             # a large alpha can leave elastic net at max_iter; that candidate just scores worse
             warnings.simplefilter("ignore", ConvergenceWarning)
-            m.fit(Xs[tr], y[tr], sample_weight=w[tr])
-        errs.append(float(np.mean((m.predict(Xs[te]) - y[te]) ** 2)))
+            m.fit(np.nan_to_num(scaler.transform(rows[tr])), y[tr], sample_weight=w[tr])
+        errs.append(float(np.mean((m.predict(np.nan_to_num(scaler.transform(rows[te]))) - y[te]) ** 2)))
     return float(np.mean(errs))
 
 
@@ -55,14 +56,16 @@ class _PenalizedLinear(Forecaster):
         Xs = np.nan_to_num(self.scaler_.transform(rows))
         yv = y.to_numpy(dtype=float)
         w = np.ones(len(yv)) if sample_weight is None else sample_weight.to_numpy(dtype=float)
-        t_end = pd.Series(
-            X.index[np.minimum(X.index.get_indexer(y.index) + 2, len(X) - 1)], index=y.index
-        )
+        # the 1-session label ends two sessions after its decision date; a label whose end
+        # falls past the rows given is treated as unresolved (NaT), which purges conservatively
+        end_pos = X.index.get_indexer(y.index) + 2
+        ends = [X.index[p] if p < len(X) else pd.NaT for p in end_pos]
+        t_end = pd.Series(pd.DatetimeIndex(ends), index=y.index)
         folds = PurgedKFold(self.inner_splits, self.embargo).sklearn_splits(
             t_end, pd.DatetimeIndex(X.index)
         )
         scores = {
-            a: _inner_cv_score(self.estimator, self._kwargs(a), Xs, yv, w, folds)
+            a: _inner_cv_score(self.estimator, self._kwargs(a), rows, yv, w, folds)
             for a in self.alphas
         }
         self.alpha_ = min(scores, key=lambda a: scores[a])
