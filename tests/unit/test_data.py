@@ -133,3 +133,13 @@ def test_parse_fred_csv_refuses_a_changed_format():
     rows = "\n".join(f"2020-01-{d:02d},4.1%" for d in range(1, 29))
     with pytest.raises(ValueError, match="aren't numbers"):
         sources.parse_fred_csv("observation_date,DGS10\n" + rows + "\n", "DGS10")
+
+
+def test_dev_mode_truncates_every_series(tmp_cfg):
+    write_synthetic(tmp_cfg)
+    dev = load_market_data(tmp_cfg, "dev")
+    cut = pd.Timestamp(tmp_cfg.lockbox.start)
+    m = dev.market
+    assert all(df.index.max() < cut for df in m.prices.values())
+    assert m.rates.index.max() < cut and m.factors.index.max() < cut
+    assert all((idx < cut).all() for idx in m.earnings.values())
