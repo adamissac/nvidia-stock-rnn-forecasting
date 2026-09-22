@@ -80,3 +80,21 @@ One dated entry per phase: Hypothesis, What ran, Result, Decision. Numbers come 
 - Costs aren't what decides the ranking. The best configuration goes from 1.19 at 0 bps to 1.16 at 20 bps per side (`cost_sweep`), and square-root impact barely matters until $10B (`capacity`), because its turnover is low.
 
 **Decision.** Nothing so far beats the key ablation. I'll run the full statistics (DSR, PBO, SPA, attribution, peers) before calling it, but no parameter will be changed to chase the benchmark.
+
+## 2026-09-22: Phase 7, evaluation and risk
+
+**Hypothesis.** If the best configuration has real skill, it should survive trial adjustment (DSR, PBO), beat the benchmarks under Hansen's SPA, show alpha that isn't just NVDA's own run, and work on the peers too.
+
+**What ran.** Metrics with stationary-bootstrap CIs, PSR, DSR (N = 80 strategy trials, and N = 421 logged fits as a sensitivity check), MinTRL, PBO over 12,870 CSCV combinations, SPA and White's RC against buy and hold and vol-targeted buy and hold, a 1,000-path random null, factor attribution, four VaR methods with Kupiec and Christoffersen backtests, stress windows, regimes, calendar years, a block-bootstrap Monte Carlo, CPCV paths for ridge and LightGBM, feature importance, and the same pipeline on all 10 peers.
+
+**Result.** From `reports/results.json`:
+- The best configuration's DSR is 0.99 (0.95 counting every fit). That only says its Sharpe beats what luck across 80 trials would produce. It doesn't say it beats the benchmark: its Sharpe is 0.03 below vol-targeted buy and hold, and the SPA p-value against that benchmark is 0.153 (`headline`). PBO is 0.29.
+- FF5 plus momentum alpha is 32.8% a year (t = 3.98), but vol-targeted buy and hold shows about the same (`attribution.bh_voltarget`), so the "alpha" is NVDA beating the factors in this sample, not the model.
+- The random null (matched to the best configuration's exposure, which is long 97.8% of the time) is beaten by the best configuration on 98.0% of paths. That measures vol targeting against unscaled exposure, not forecasting skill.
+- 28.8% of the summed daily PnL comes from 2023 to 2024 (`pnl_share_2023_2024`). The calendar-year table shows 2016 and 2021 contributed as much.
+- Peers: with the vol-target sizing, ridge beat the peer's vol-targeted buy and hold on 1 of 10 peers, and LightGBM and the historical mean on 0 (`peers.n_beating_voltarget`).
+- 99% VaR: historical and Gaussian VaR are rejected or borderline by Kupiec (exception rates 1.35% and 1.43%). Cornish-Fisher and GARCH VaR pass (p = 0.215 and 0.422).
+- Feature importance is unstable: the mean rank correlation of MDA across purged folds is 0.13 (`importance.stability.mda`), which is what you'd expect when there isn't much signal to rank.
+- The 2008 stress window has no out-of-sample coverage, because the first out-of-sample date is 2009-07-22.
+
+**Decision.** The development-period conclusion is a null result. No forecast adds value beyond vol targeting after costs, and the method doesn't transfer to the peers. For the lockbox I'll preregister the best configuration, the best ML configuration, and the benchmarks, so 2025 can confirm or contradict this without any new selection.
